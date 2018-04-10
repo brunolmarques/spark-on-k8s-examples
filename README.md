@@ -15,14 +15,14 @@ Running spark-submit over spark-on-kubernetes
 
 On MacOS and Linux, tools can be installed via [Python PIP](https://pip.pypa.io/en/stable/installing)
 
-* In case you have sudo access
-```
-$ pip install --upgrade cern-spark-service
-```
-
 * In case you don't have sudo access (lxplus7, lxplus-cloud)
 ```
 $ pip install --user --upgrade cern-spark-service
+```
+
+* In case you have sudo access
+```
+$ pip install --upgrade cern-spark-service
 ```
 
 * For more info, please refer to [installation instructions of cern-spark-service](https://pypi.org/project/cern-spark-service)
@@ -33,14 +33,14 @@ Before running spark-submit, make sure you have your configuration of Spark on K
 locally e.g. using
 
 ```
-cern-spark-service create --openstack-only-config
+cern-spark-service fetch --openstack-config
 ```
 
 The above will ask you to select your Openstack project, then Kubernetes cluster in the project, 
 and fetch the configuration for you. Check everything with
 
 ```
-cern-spark-service check <your-cluster-name>
+cern-spark-service check --cluster <your-cluster-name>
 ```
 
 * For more info, please refer to [cern-spark-service documentation](https://pypi.org/project/cern-spark-service)
