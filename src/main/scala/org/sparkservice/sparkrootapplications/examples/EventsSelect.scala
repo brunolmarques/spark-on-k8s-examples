@@ -12,7 +12,6 @@ object EventsSelect {
 
     // get the Dataset[Row] = Dataframe (from 2.0)
     val df = spark.sqlContext.read.option("tree", "Events").root(inputPath)
-    df.printSchema
 
     // at this point at least...
     import spark.implicits._
