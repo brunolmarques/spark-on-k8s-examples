@@ -69,6 +69,26 @@ http://central.maven.org/maven2/org/diana-hep/spark-root_2.11/0.1.16/spark-root_
 root://eospublic.cern.ch://eos/opendata/cms/Run2010B/MuOnia/AOD/Apr21ReReco-v1/0000/FEF1B99B-BF77-E011-B0A0-E41F1318174C.root
 ```
 
+- **EventsSelect with Kerberos ticket for EOS**
+
+```
+$ export USER=<your-user>
+$ kinit -c /tmp/krb5cc_$USER $USER
+$ cern-spark-service spark-submit \
+--cluster <your-cluster-name> \
+--conf spark.executor.instances=20 \
+--class org.sparkservice.sparkrootapplications.examples.EventsSelect \
+--jars \
+http://central.maven.org/maven2/org/diana-hep/root4j/0.1.6/root4j-0.1.6.jar,\
+http://central.maven.org/maven2/org/apache/bcel/bcel/5.2/bcel-5.2.jar,\
+http://central.maven.org/maven2/org/diana-hep/spark-root_2.11/0.1.16/spark-root_2.11-0.1.16.jar \
+--files /tmp/krb5cc_$USER \
+--conf spark.kubernetes.driverEnv.KRB5CCNAME=./krb5cc_$USER \
+--conf spark.executorEnv.KRB5CCNAME=./krb5cc_$USER \
+<path-to-examples>/spark-service/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.0.1.jar \
+root://eosuser.cern.ch/eos/user/<first-letter-your-user>/<your-user>/<some-rootfile-name>
+```
+
 - **DimuonReductionAOD**
 
 ```
