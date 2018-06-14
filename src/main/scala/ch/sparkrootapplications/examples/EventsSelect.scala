@@ -1,4 +1,4 @@
-package org.sparkservice.sparkrootapplications.examples
+package ch.cern.sparkrootapplications.examples
 
 import org.apache.spark.sql.SparkSession
 import org.dianahep.sparkroot._

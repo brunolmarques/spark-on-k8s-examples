@@ -1,10 +1,10 @@
 name := "spark-service-examples"
 
-organization := "org.sparkservice"
+organization := "ch.cern"
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
-version := "0.0.1"
+version := "0.1.0"
 
 isSnapshot := true
 

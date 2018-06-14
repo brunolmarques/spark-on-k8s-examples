@@ -6,13 +6,10 @@ Collection of stable application's examples for spark on kubernetes service
 ### Table of Contents
 
 - Create and manage Spark on Kubernetes cluster
-    - TODO
 - Submitting Spark applications
-    - TODO
-- Legacy:
-    - [Spark cluster management and submitting applications using legacy cern-spark-service](docs/spark-k8s-2.2.0-fork.md)
+- [Legacy: Spark cluster management and submitting applications using legacy cern-spark-service](docs/spark-k8s-2.2.0-fork.md)
 
-### Building jars
+### Building examples jars
 
 Being in root folder of this repository, run:
 
