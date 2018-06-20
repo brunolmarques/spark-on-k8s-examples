@@ -13,12 +13,14 @@ Collection of stable application's examples for spark on kubernetes service
 
 ### Prerequisites
 
-- **Install spark-on-k8s on Kubernetes cluster with Initializers enabled**
+1. **Install spark-on-k8s on Kubernetes cluster with Initializers enabled**
 
+    NOTE: if you already have cluster created, skip
+    
     For Openstack you can use dedicated python tool [opsparkctl](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl).
     However, if you have on-premise kubernetes cluster, check [manual spark-on-k8s installation for on-premise](docs/spark-k8s-cluster.md)
 
-- **Fetch cluster configuration to be able to use sparkctl/kubectl**
+2. **Fetch cluster configuration to be able to use sparkctl/kubectl**
 
     For Openstack, you can use [opsparkctl create local-kube-config](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl). 
     However, if you have on-premise kubernetes cluster, check [manual kubectl config](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters)
@@ -28,7 +30,7 @@ Collection of stable application's examples for spark on kubernetes service
     config    ca.pem    cert.pem    key.pem
     ```
 
-- **If you use Openstack, check your cluster status**
+3. **If you use Openstack, check your cluster status**
     
     You can check cluster status by [opsparkctl status](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl). 
     The following output should be displayed:
