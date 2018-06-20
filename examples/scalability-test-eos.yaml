@@ -17,22 +17,34 @@
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
 metadata:
-  name: public-eos-events-select
+  name: scalability-test-eos
   namespace: default
 spec:
   type: Scala
   mode: cluster
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:master
   imagePullPolicy: Always
-  mainClass: ch.cern.sparkrootapplications.examples.EventsSelect
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
+  mainClass: ch.cern.sparkrootapplications.examples.DimuonReductionAODMultiDataset
+  mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.1.0.jar
   arguments:
-    - "root://eospublic.cern.ch://eos/opendata/cms/Run2010B/MuOnia/AOD/Apr21ReReco-v1/0000/FEF1B99B-BF77-E011-B0A0-E41F1318174C.root"
+     # Note that this file has to be submitted to driver by deps->files,
+     # and then fetched in application with SparkFiles to executors
+     # val configClusterFilePath = SparkFiles.get(configFileName)
+    - scalability-test-eos-datasets.csv
+     # save to local filesystem
+    - file:///tmp/scalability-test-eos-results
   deps:
+    files:
+      - <path-to>/spark-service-examples/examples/scalability-test-eos-datasets.csv
     jars:
       - http://central.maven.org/maven2/org/diana-hep/root4j/0.1.6/root4j-0.1.6.jar
       - http://central.maven.org/maven2/org/apache/bcel/bcel/5.2/bcel-5.2.jar
       - http://central.maven.org/maven2/org/diana-hep/spark-root_2.11/0.1.16/spark-root_2.11-0.1.16.jar
+  sparkConf:
+    # Secure EOS - During submission of job,
+    # ensure to have krb5cc_0 ticket inside your local HADOOP_CONF_DIR
+    "spark.kubernetes.driverEnv.KRB5CCNAME": /etc/hadoop/conf/krb5cc_0
+    "spark.executorEnv.KRB5CCNAME": /etc/hadoop/conf/krb5cc_0
   driver:
     cores: 1
     coreLimit: "1000m"
@@ -41,9 +53,9 @@ spec:
       version: 2.3.0
     serviceAccount: spark
   executor:
-    instances: 1
-    cores: 1
-    memory: "2048m"
+    instances: 4
+    cores: 4
+    memory: "5048m"
     labels:
       version: 2.3.0
   restartPolicy: Never

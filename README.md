@@ -96,10 +96,12 @@ To check application status
 $ ./sparkctl status spark-pi
 ```
 
-Alternatively, to check application status
+Alternatively, to check application status (or check created pods and their status)
 
 ```
 $ kubectl describe sparkapplication spark-pi
+or
+$ kubectl get pods --watch -n default
 or
 $ kubectl describe pod spark-pi-1528991055721-driver
 or
@@ -165,6 +167,24 @@ $ kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user>
 Submit your application with custom hadoop config directory to authenticate EOS
 $ export HADOOP_CONF_DIR=~/hadoop-conf-dir
 $ ./sparkctl create ./examples/secure-eos-events-select.yaml
+```
+
+**Scalability tests example**
+
+```
+Create hadoop config dir and put your kerberos cache there
+$ kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user>
+```
+```
+Edit your scalability-test dataset
+- 2,5GB: 101,SingleMu_Run2012C,1,root://eospublic.cern.ch/eos/opendata/cms/Run2012C/SingleMu/AOD/22Jan2013-v1/30010
+- 20TB: 101,SingleMu_Run2012C,1,root://eospublic.cern.ch/eos/opendata/cms/Run2012C/SingleMu/AOD/22Jan2013-v1/*0*/
+$ vi ./examples/scalability-test-eos-datasets.csv
+```
+```
+Submit your application with custom hadoop config directory to authenticate EOS
+$ export HADOOP_CONF_DIR=~/hadoop-conf-dir
+$ ./sparkctl create ./examples/scalability-test-eos.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
 ```
 
 ### Building examples jars
