@@ -1,0 +1,52 @@
+#
+# Copyright 2018 CERN/Switzerland
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+apiVersion: "sparkoperator.k8s.io/v1alpha1"
+kind: SparkApplication
+metadata:
+  name: tpcds
+  namespace: default
+spec:
+  type: Scala
+  mode: cluster
+  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:tpcds
+  imagePullPolicy: Always
+  mainClass: ch.cern.tpcds.BenchmarkSparkSQL
+  mainApplicationFile: "/Users/pmrowczy/Projects/spark-service/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar"
+  arguments:
+    - "files:///tmp"
+    - "/opt/tpcds-kit/tools"
+    - "1"
+    - "1"
+    - "false"
+  deps:
+    jars:
+      - https://binaries.cs3.cern.ch/spark-sql-perf/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+      - http://central.maven.org/maven2/com/typesafe/scala-logging/scala-logging-slf4j_2.11/2.1.2/scala-logging-slf4j_2.11-2.1.2.jar
+  driver:
+    cores: 2
+    coreLimit: "2048m"
+    memory: "4096m"
+    labels:
+      version: 2.3.0
+    serviceAccount: spark
+  executor:
+    instances: 30
+    cores: 2
+    memory: "4096m"
+    labels:
+      version: 2.3.0
+  restartPolicy: Never

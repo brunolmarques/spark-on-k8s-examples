@@ -4,7 +4,7 @@ organization := "ch.cern"
 
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
-version := "0.1.0"
+version := "0.2.0"
 
 isSnapshot := true
 
@@ -17,6 +17,10 @@ sparkVersion := "2.1.1"
 sparkComponents := Seq("sql")
 
 resolvers += Resolver.mavenLocal
+
+unmanagedBase <<= baseDirectory { base => base / "libs" }
+
+libraryDependencies += "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2"
 
 libraryDependencies += "org.diana-hep" % "spark-root_2.11" % "0.1.16"
 
