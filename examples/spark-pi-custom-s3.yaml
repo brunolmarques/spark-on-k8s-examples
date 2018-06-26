@@ -22,7 +22,7 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:master
+  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:v2.4.0
   imagePullPolicy: Always
   mainClass: ch.cern.sparkrootapplications.examples.SparkPi
   mainApplicationFile: "<path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.1.0.jar"
@@ -42,12 +42,12 @@ spec:
     coreLimit: "1000m"
     memory: "1024m"
     labels:
-      version: 2.3.0
+      version: 2.4.0
     serviceAccount: spark
   executor:
     instances: 1
     cores: 1
     memory: "2048m"
     labels:
-      version: 2.3.0
+      version: 2.4.0
   restartPolicy: Never

@@ -28,13 +28,14 @@ object BenchmarkSparkSQL {
       .appName("TPCDS Benchmark")
       .getOrCreate()
 
+    val tables = new TPCDSTables(spark.sqlContext,
+      dsdgenDir = dsdgenDir,
+      scaleFactor = scaleFactor,
+      useDoubleForDecimal = false,
+      useStringForDate = false)
+
     if (!skipCreate) {
       println(s"Generating data")
-      val tables = new TPCDSTables(spark.sqlContext,
-        dsdgenDir = dsdgenDir,
-        scaleFactor = scaleFactor,
-        useDoubleForDecimal = false,
-        useStringForDate = false)
 
       tables.genData(
         location = tpcdsDir,
@@ -45,21 +46,13 @@ object BenchmarkSparkSQL {
         filterOutNullPartitionValues = false,
         tableFilter = "",
         numPartitions = 100)
-
-      Try {
-        spark.sql(s"create database $databaseName")
-      }
-      tables.createExternalTables(tpcdsDir, "parquet", databaseName, overwrite = true, discoverPartitions = true)
-      tables.analyzeTables(databaseName, analyzeColumns = true)
-    } else {
-      println(s"Skip data generation")
-      val tables = new TPCDSTables(spark.sqlContext,
-        dsdgenDir = dsdgenDir,
-        scaleFactor = scaleFactor,
-        useDoubleForDecimal = false,
-        useStringForDate = false)
-      spark.sql(s"use $databaseName")
     }
+
+    Try {
+      spark.sql(s"create database $databaseName")
+    }
+    tables.createExternalTables(tpcdsDir, "parquet", databaseName, overwrite = true, discoverPartitions = true)
+    tables.analyzeTables(databaseName, analyzeColumns = true)
 
     val tpcds = new TPCDS(spark.sqlContext)
     val queries = tpcds.tpcds2_4Queries
