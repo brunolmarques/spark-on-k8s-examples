@@ -17,7 +17,7 @@
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
 metadata:
-  name: scalability-test-eos
+  name: scltest-eos
   namespace: default
 spec:
   type: Scala
@@ -25,7 +25,7 @@ spec:
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:v2.4.0
   imagePullPolicy: Always
   mainClass: ch.cern.sparkrootapplications.examples.DimuonReductionAODMultiDataset
-  mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.1.0.jar
+  mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
   arguments:
      # Note that this file has to be submitted to driver by deps->files,
      # and then fetched in application with SparkFiles to executors
@@ -55,7 +55,7 @@ spec:
   executor:
     instances: 4
     cores: 4
-    memory: "5048m"
+    memory: "6048m"
     labels:
       version: 2.4.0
   restartPolicy: Never

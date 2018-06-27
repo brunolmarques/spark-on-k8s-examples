@@ -25,7 +25,7 @@ object BenchmarkSparkSQL {
 
     val spark = SparkSession
       .builder
-      .appName("TPCDS Benchmark")
+      .appName(s"TPCDS Benchmark $scaleFactor GB")
       .getOrCreate()
 
     val tables = new TPCDSTables(spark.sqlContext,
@@ -48,6 +48,7 @@ object BenchmarkSparkSQL {
         numPartitions = 100)
     }
 
+    //tables.createTemporaryTables(tpcdsDir, "parquet")
     Try {
       spark.sql(s"create database $databaseName")
     }

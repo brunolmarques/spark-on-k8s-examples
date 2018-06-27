@@ -12,15 +12,15 @@ scalaVersion := "2.11.8"
 
 spIgnoreProvided := true
 
-sparkVersion := "2.1.1"
+sparkVersion := "2.3.0"
 
-sparkComponents := Seq("sql")
+sparkComponents := Seq("sql", "hive", "mllib")
 
 resolvers += Resolver.mavenLocal
 
 unmanagedBase <<= baseDirectory { base => base / "libs" }
 
-libraryDependencies += "com.typesafe.scala-logging" % "scala-logging-slf4j_2.11" % "2.1.2"
+//libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"
 
 libraryDependencies += "org.diana-hep" % "spark-root_2.11" % "0.1.16"
 

@@ -22,20 +22,21 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:tpcds
+  # Use staging (tpcds image)
+  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s-staging:v2.4.0
   imagePullPolicy: Always
   mainClass: ch.cern.tpcds.BenchmarkSparkSQL
-  mainApplicationFile: "/Users/pmrowczy/Projects/spark-service/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar"
+  mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
   arguments:
-    - "s3a://spark-on-k8s-cluster/TPCDS"
+    - "s3a://<your-bucket>/TPCDS"
     - "/opt/tpcds-kit/tools"
     - "1"
-    - "1"
-    - "false"
+    - "5"
+    - "true"
   deps:
     jars:
-      - https://binaries.cs3.cern.ch/spark-sql-perf/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
-      - http://central.maven.org/maven2/com/typesafe/scala-logging/scala-logging-slf4j_2.11/2.1.2/scala-logging-slf4j_2.11-2.1.2.jar
+      - <path-to>/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
+      - <path-to>/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
   sparkConf:
     "spark.cleaner.referenceTracking.blocking": "true"
     "spark.driver.maxResultSize": "4g"
@@ -59,16 +60,16 @@ spec:
     "spark.sql.parquet.filterPushdown": "true"
     "spark.sql.hive.metastorePartitionPruning": "true"
   driver:
-    cores: 2
-    coreLimit: "2048m"
-    memory: "4096m"
+    cores: 4
+    coreLimit: "4096m"
+    memory: "6000m"
     labels:
       version: 2.4.0
     serviceAccount: spark
   executor:
-    instances: 1
-    cores: 2
-    memory: "4096m"
+    instances: 50
+    cores: 4
+    memory: "6000m"
     labels:
       version: 2.4.0
   restartPolicy: Never
