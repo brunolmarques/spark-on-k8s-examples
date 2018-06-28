@@ -298,17 +298,31 @@ object DimuonReductionAODMultiDataset {
     // Get output path
     val outputPath = args(1)
 
+    // Measure output
+    val csv_filename = args(2)
+
     val spark = SparkSession.builder()
       .appName("AOD Public DS Example")
       .getOrCreate()
     val sc = spark.sparkContext
+
+    val stageMetrics = ch.cern.sparkmeasure.StageMetrics(spark)
+    stageMetrics.begin()
 
     // for case classes inside Datasets
     import spark.implicits._
 
     // read in configuration csv file to dataset.  Use case class Sample as schema
     println(s"Submitted config filename ${configFileName}")
-    val configClusterFilePath = SparkFiles.get(configFileName)
+
+    var configClusterFilePath = configFileName
+    if (!configFileName.startsWith("./")) {
+      configClusterFilePath = SparkFiles.get(configFileName)
+      println(s"Read at worker from ${configClusterFilePath}")
+    } else {
+      println(s"Explicit path, reading from ${configFileName}")
+    }
+
     val bufferedSource = Source.fromFile(configClusterFilePath)
     val sampleBuf = scala.collection.mutable.ListBuffer.empty[Sample]
     for (line <- bufferedSource.getLines) {
@@ -376,6 +390,9 @@ object DimuonReductionAODMultiDataset {
     val parquetFilenameMll = outputPath + "/dimuonReduced_" + date + "/mll.parquet"
     dsMll.write.format("parquet").save(parquetFilenameMll)
 
+    stageMetrics.end()
+    stageMetrics.printReport()
+    spark.table("PerfStageMetrics").repartition(1).write.format("csv").option("header", "true").save(csv_filename)
     // stop the session/context
     spark.stop
 

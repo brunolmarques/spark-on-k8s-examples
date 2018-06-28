@@ -32,7 +32,8 @@ spec:
      # val configClusterFilePath = SparkFiles.get(configFileName)
     - scalability-test-eos-datasets.csv
      # save to local filesystem
-    - file:///tmp/scalability-test-eos-results
+    - file:///tmp/reduction-output
+    - file:///tmp/sparkmeasure-results
   deps:
     files:
       - <path-to>/spark-service-examples/examples/scalability-test-eos-datasets.csv
@@ -40,6 +41,7 @@ spec:
       - http://central.maven.org/maven2/org/diana-hep/root4j/0.1.6/root4j-0.1.6.jar
       - http://central.maven.org/maven2/org/apache/bcel/bcel/5.2/bcel-5.2.jar
       - http://central.maven.org/maven2/org/diana-hep/spark-root_2.11/0.1.16/spark-root_2.11-0.1.16.jar
+      - http://central.maven.org/maven2/ch/cern/sparkmeasure/spark-measure_2.11/0.11/spark-measure_2.11-0.11.jar
   sparkConf:
     # Secure EOS - During submission of job,
     # ensure to have krb5cc_0 ticket inside your local HADOOP_CONF_DIR
@@ -53,7 +55,7 @@ spec:
       version: 2.4.0
     serviceAccount: spark
   executor:
-    instances: 4
+    instances: 1
     cores: 4
     memory: "6048m"
     labels:

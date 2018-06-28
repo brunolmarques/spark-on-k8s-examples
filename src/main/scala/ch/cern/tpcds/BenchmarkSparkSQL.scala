@@ -7,7 +7,7 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.expressions._
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.functions.col
-
+import org.apache.log4j.{Level, LogManager}
 import scala.util.Try
 
 object BenchmarkSparkSQL {
@@ -19,6 +19,8 @@ object BenchmarkSparkSQL {
     val skipCreate = Try(args(4).toBoolean).getOrElse(false)
     val optimizeQueries = Try(args(5).toBoolean).getOrElse(false)
     val genPartitions = Try(args(6).toInt).getOrElse(100)
+    val clusterByPartColumns = Try(args(7).toBoolean).getOrElse(false)
+    val onlyWarn = Try(args(8).toBoolean).getOrElse(false)
 
     val tpcdsDir = s"$rootDir/tpcds"
     val resultLocation = s"$rootDir/tpcds_result"
@@ -35,6 +37,11 @@ object BenchmarkSparkSQL {
       .appName(s"TPCDS Benchmark $scaleFactor GB")
       .getOrCreate()
 
+    if (onlyWarn) {
+      println(s"Only WARN")
+      LogManager.getLogger("org").setLevel(Level.WARN)
+    }
+
     val tables = new TPCDSTables(spark.sqlContext,
       dsdgenDir = dsdgenDir,
       scaleFactor = scaleFactor,
@@ -49,7 +56,7 @@ object BenchmarkSparkSQL {
         format = format,
         overwrite = true,
         partitionTables = true,
-        clusterByPartitionColumns = true,
+        clusterByPartitionColumns = clusterByPartColumns,
         filterOutNullPartitionValues = false,
         tableFilter = "",
         numPartitions = genPartitions)

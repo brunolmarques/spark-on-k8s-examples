@@ -26,26 +26,30 @@ spec:
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s-staging:v2.4.0
   imagePullPolicy: Always
   mainClass: ch.cern.tpcds.BenchmarkSparkSQL
-  mainApplicationFile: /Users/pmrowczy/Projects/spark-service/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
+  mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
   arguments:
     # working directory (existing or not)
     - "s3a://spark-on-k8s-cluster/TPCDS"
     # Path to kit in the docker image
     - "/opt/tpcds-kit/tools"
     # Scale factor (in GB)
-    - "100"
+    - "1"
     # Number of iterations
     - "3"
     # Skip creation
-    - "false"
-    # Optimize queries
     - "true"
+    # Optimize queries
+    - "false"
     # Generate data num partitions
     - "100"
+    # Shuffle to partition
+    - "true"
+    # Logging set to WARN
+    - "true"
   deps:
     jars:
-      - /Users/pmrowczy/Projects/spark-service/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
-      - /Users/pmrowczy/Projects/spark-service/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+      - <path-to>/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
+      - <path-to>/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
   sparkConf:
     "spark.network.timeout": "1200"
     "spark.sql.broadcastTimeout": "1200"
@@ -82,7 +86,7 @@ spec:
   executor:
     instances: 50
     cores: 4
-    memory: "6000m"
+    memory: "5000m"
     labels:
       version: 2.4.0
   restartPolicy: Never
