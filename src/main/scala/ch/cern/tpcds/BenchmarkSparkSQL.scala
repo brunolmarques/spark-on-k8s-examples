@@ -2,6 +2,11 @@ package ch.cern.tpcds
 
 import com.databricks.spark.sql.perf.tpcds.{TPCDS, TPCDSTables}
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.expressions._
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions.col
 
 import scala.util.Try
 
@@ -12,6 +17,7 @@ object BenchmarkSparkSQL {
     val scaleFactor = args(2)
     val iterations = args(3).toInt
     val skipCreate = Try(args(4).toBoolean).getOrElse(false)
+    val optimizeQueries = Try(args(5).toBoolean).getOrElse(false)
 
     val tpcdsDir = s"$rootDir/tpcds"
     val resultLocation = s"$rootDir/tpcds_result"
@@ -48,12 +54,16 @@ object BenchmarkSparkSQL {
         numPartitions = 100)
     }
 
-    //tables.createTemporaryTables(tpcdsDir, "parquet")
-    Try {
-      spark.sql(s"create database $databaseName")
+    if (optimizeQueries) {
+      Try {
+        spark.sql(s"create database $databaseName")
+      }
+      tables.createExternalTables(tpcdsDir, "parquet", databaseName, overwrite = true, discoverPartitions = true)
+      tables.analyzeTables(databaseName, analyzeColumns = true)
+      spark.conf.set("spark.sql.cbo.enabled", "true")
+    } else {
+      tables.createTemporaryTables(tpcdsDir, "parquet")
     }
-    tables.createExternalTables(tpcdsDir, "parquet", databaseName, overwrite = true, discoverPartitions = true)
-    tables.analyzeTables(databaseName, analyzeColumns = true)
 
     val tpcds = new TPCDS(spark.sqlContext)
     val queries = tpcds.tpcds2_4Queries
@@ -65,7 +75,18 @@ object BenchmarkSparkSQL {
       forkThread = true)
 
     experiment.waitForFinish(timeout)
-    val specificResultTable = spark.read.json(experiment.resultPath)
+
+    val resultPath = experiment.resultPath
+    println(s"Reading result at $resultPath")
+    val specificResultTable = spark.read.json(resultPath)
     specificResultTable.show()
+
+    val result = specificResultTable.withColumn("result", explode(col("results"))).withColumn("executionSeconds", col("result.executionTime")/1000).withColumn("queryName", col("result.name"))
+    result.select("iteration", "queryName", "executionSeconds").show()
+
+    println(s"Final results at $resultPath")
+    val aggResults = result.groupBy("queryName").agg(callUDF("percentile", col("executionSeconds").cast("long"), lit(0.5)).as('medianRuntimeSeconds)).orderBy(col("queryName"))
+    aggResults.repartition(1).write.csv(s"$resultPath/csv")
+    aggResults.show(105)
   }
 }

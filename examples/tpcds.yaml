@@ -28,16 +28,27 @@ spec:
   mainClass: ch.cern.tpcds.BenchmarkSparkSQL
   mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
   arguments:
-    - "s3a://<your-bucket>/TPCDS"
+    # working directory (existing or not)
+    - "s3a://<cluster-bucket-name>/TPCDS"
+    # Path to kit in the docker image
     - "/opt/tpcds-kit/tools"
+    # Scale factor (in GB)
     - "1"
-    - "5"
-    - "true"
+    # Number of iterations
+    - "3"
+    # Skip creation
+    - "false"
+    # Optimize queries
+    - "false"
   deps:
     jars:
       - <path-to>/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
       - <path-to>/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
   sparkConf:
+    "spark.network.timeout": "1200"
+    "spark.sql.broadcastTimeout": "1200"
+    "fs.s3a.connection.timeout": "1200000"
+    "spark.sql.crossJoin.enabled": "true"
     "spark.cleaner.referenceTracking.blocking": "true"
     "spark.driver.maxResultSize": "4g"
     "fs.s3a.path.style.access": "true"
