@@ -18,6 +18,7 @@ object BenchmarkSparkSQL {
     val iterations = args(3).toInt
     val skipCreate = Try(args(4).toBoolean).getOrElse(false)
     val optimizeQueries = Try(args(5).toBoolean).getOrElse(false)
+    val genPartitions = Try(args(6).toInt).getOrElse(100)
 
     val tpcdsDir = s"$rootDir/tpcds"
     val resultLocation = s"$rootDir/tpcds_result"
@@ -51,7 +52,7 @@ object BenchmarkSparkSQL {
         clusterByPartitionColumns = true,
         filterOutNullPartitionValues = false,
         tableFilter = "",
-        numPartitions = 100)
+        numPartitions = genPartitions)
     }
 
     if (optimizeQueries) {
