@@ -178,8 +178,7 @@ $ kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user>
 ```
 ```
 Submit your application with custom hadoop config directory to authenticate EOS
-$ export HADOOP_CONF_DIR=~/hadoop-conf-dir
-$ ./sparkctl create ./jobs/secure-eos-events-select.yaml
+$ HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/secure-eos-events-select.yaml
 ```
 
 **Scalability tests example**
@@ -196,8 +195,7 @@ $ vi ./examples/scalability-test-eos-datasets.csv
 ```
 ```
 Submit your application with custom hadoop config directory to authenticate EOS
-$ export HADOOP_CONF_DIR=~/hadoop-conf-dir
-$ ./sparkctl create ./jobs/scalability-test-eos.yaml --upload-to s3a://<your-cluster-name> --override --endpoint-url "https://cs3.cern.ch"
+$ HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/scalability-test-eos.yaml --upload-to s3a://<your-cluster-name> --override --endpoint-url "https://cs3.cern.ch"
 ```
 
 **TPCDS example**
