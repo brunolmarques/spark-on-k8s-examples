@@ -90,7 +90,7 @@ The most important sections of your SparkApplication are:
 To submit application
 
 ```
-$ ./sparkctl create ./examples/spark-pi.yaml
+$ ./sparkctl create ./jobs/spark-pi.yaml
 ```
 
 To delete application
@@ -154,7 +154,7 @@ aws_secret_access_key = <redacted>
 After that, you will be able to submit applications with local dependencies, as shown in example `examples/spark-pi-deps.yaml` 
 
 ```bash
-$ ./sparkctl create ./examples/spark-pi-deps.yaml \
+$ ./sparkctl create ./jobs/spark-pi-deps.yaml \
 --upload-to s3a://<your-cluster-name> \
 --override \
 --endpoint-url "https://cs3.cern.ch"
@@ -179,7 +179,7 @@ $ kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user>
 ```
 Submit your application with custom hadoop config directory to authenticate EOS
 $ export HADOOP_CONF_DIR=~/hadoop-conf-dir
-$ ./sparkctl create ./examples/secure-eos-events-select.yaml
+$ ./sparkctl create ./jobs/secure-eos-events-select.yaml
 ```
 
 **Scalability tests example**
@@ -197,14 +197,14 @@ $ vi ./examples/scalability-test-eos-datasets.csv
 ```
 Submit your application with custom hadoop config directory to authenticate EOS
 $ export HADOOP_CONF_DIR=~/hadoop-conf-dir
-$ ./sparkctl create ./examples/scalability-test-eos.yaml --upload-to s3a://<your-cluster-name> --override --endpoint-url "https://cs3.cern.ch"
+$ ./sparkctl create ./jobs/scalability-test-eos.yaml --upload-to s3a://<your-cluster-name> --override --endpoint-url "https://cs3.cern.ch"
 ```
 
 **TPCDS example**
 
 ```
 Submit your TPCDS jobs (this will submit examples from target dir, and from libs folder
-$ ./sparkctl create ./examples/tpcds.yaml --upload-to s3a://<your-cluster-name> --override --endpoint-url "https://cs3.cern.ch"
+$ ./sparkctl create ./jobs/tpcds.yaml --upload-to s3a://<your-cluster-name> --override --endpoint-url "https://cs3.cern.ch"
 ```
 
 ```
