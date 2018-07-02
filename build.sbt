@@ -12,7 +12,7 @@ scalaVersion := "2.11.8"
 
 spIgnoreProvided := true
 
-sparkVersion := "2.1.0"
+sparkVersion := "2.3.0"
 
 sparkComponents := Seq("sql", "hive", "mllib")
 

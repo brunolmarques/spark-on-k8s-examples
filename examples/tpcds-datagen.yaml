@@ -17,7 +17,7 @@
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
 metadata:
-  name: tpcds
+  name: tpcds-data-gen
   namespace: default
 spec:
   type: Scala
@@ -25,53 +25,38 @@ spec:
   # Use staging (tpcds image)
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s-staging:v2.4.0
   imagePullPolicy: Always
-  mainClass: ch.cern.tpcds.BenchmarkSparkSQL
+  mainClass: ch.cern.tpcds.DataGenTPCDS
   mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
   arguments:
     # working directory (existing or not)
-    - "s3a:///<your-cluster-bucket>/TPCDS-TEST"
+    - "s3a://<your-cluster-bucket>/TPCDS-TEST"
     # Path to kit in the docker image
     - "/opt/tpcds-kit/tools"
     # Scale factor (in GB)
     - "1"
-    # Number of iterations
-    - "3"
-    # Optimize queries
+    # Generate data num partitions
+    - "100"
+    # Create the partitioned fact tables
     - "false"
-    # Filter queries, will run all if empty - "q23a-v2.4,q23b-v2.4"
-    - ""
+    # Shuffle to get partitions coalesced into single files.
+    - "false"
     # Logging set to WARN
     - "true"
   deps:
     jars:
-      - <path-to>/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
-      - <path-to>/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+      - <path-to>/spark-service/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
+      - <path-to>/spark-service/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
   sparkConf:
     "spark.network.timeout": "1200"
-    "spark.sql.broadcastTimeout": "10000"
     "fs.s3a.connection.timeout": "1200000"
-    "spark.sql.crossJoin.enabled": "true"
-    "spark.cleaner.referenceTracking.blocking": "true"
-    "spark.driver.maxResultSize": "4g"
     "fs.s3a.path.style.access": "true"
     "spark.hadoop.fs.s3a.connection.maximum": "200"
     "spark.hadoop.fs.s3a.fast.upload": "true"
     "spark.hadoop.fs.s3a.multipart.size": "10485760"
     "spark.hadoop.fs.s3a.multipart.threshold": "104857600"
     "spark.storage.blockManagerTimeoutIntervalMs": "300000"
-    "spark.storage.memoryFraction": "0.5"
-    "spark.worker.cleanup.enabled": "false"
-    "spark.hadoop.parquet.memory.pool.ratio": "0.5"
-    "spark.speculation.multiplier": "3"
-    "spark.speculation.quantile": "0.9"
     "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version": "2"
-    "spark.sql.parquet.cacheMetadata": "true"
-    "spark.sql.parquet.compression.codec": "gzip"
     "spark.hadoop.mapreduce.fileoutputcommitter.cleanup-failures.ignored": "true"
-    "spark.hadoop.parquet.enable.summary-metadata": "false"
-    "spark.sql.parquet.mergeSchema": "true"
-    "spark.sql.parquet.filterPushdown": "true"
-    "spark.sql.hive.metastorePartitionPruning": "true"
   driver:
     cores: 4
     coreLimit: "4096m"
@@ -81,8 +66,8 @@ spec:
     serviceAccount: spark
   executor:
     instances: 50
-    cores: 4
-    memory: "5000m"
+    cores: 2
+    memory: "6000m"
     labels:
       version: 2.4.0
   restartPolicy: Never

@@ -49,7 +49,7 @@ Collection of stable application's examples for spark on kubernetes service
 
 Install `sparkctl` tool to interact with your kubernetes cluster. 
 
-```bash
+```
 MAC:
 $ wget https://cs3.cern.ch/binaries/sparkctl/mac/latest/sparkctl
 LINUX:
@@ -64,62 +64,73 @@ $ ./sparkctl --help
 
 Edit yaml file with SparkApplication. 
 
-```bash
-$ vi ./examples/spark-pi.yaml
+```
+$ cp ./examples/spark-pi.yaml ./jobs/spark-pi.yaml
+$ vi ./jobs/spark-pi.yaml
 ```
 
 The most important sections of your SparkApplication are:
 
 - Application name
-    ```bash
+    ```
     metadata:
       name: spark-pi
     ```
 - Application file
-    ```bash
+    ```
     spec:
       mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
     ```
 - Application main class
-    ```bash
+    ```
     spec:
       mainClass: ch.cern.sparkrootapplications.examples.SparkPi
     ```
 
 To submit application
 
-```bash
+```
 $ ./sparkctl create ./examples/spark-pi.yaml
+```
+
+To delete application
+
+```
+$ ./sparkctl delete spark-pi
+```
+
+Check if your driver/executors are correctly created
+
+```
+$ kubectl get pods --watch -n default
+```
+
+To get application logs
+
+```
+$ ./sparkctl log spark-pi
 ```
 
 To check application status
 
-```bash
+```
 $ ./sparkctl status spark-pi
+```
+
+To access driver UI (forwarded to localhost:4040 from where sparctl is executed)
+
+```
+$ ./sparkctl forward spark-pi
 ```
 
 Alternatively, to check application status (or check created pods and their status)
 
 ```
-$ kubectl describe sparkapplication spark-pi
-or
-$ kubectl get pods --watch -n default
-or
 $ kubectl describe pod spark-pi-1528991055721-driver
 or
 $ kubectl logs spark-pi-1528991055721-driver
-```
-
-To get application logs
-
-```bash
-$ ./sparkctl log spark-pi
-```
-
-To delete application
-
-```bash
-$ ./sparkctl delete spark-pi
+or
+$ kubectl describe sparkapplication spark-pi
 ```
 
 For more details regarding `sparkctl`, and more detailed user guide, 
