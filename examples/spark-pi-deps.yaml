@@ -23,7 +23,7 @@ spec:
   type: Scala
   mode: cluster
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:v2.4.0
-  imagePullPolicy: Always
+  imagePullPolicy: IfNotPresent
   mainClass: ch.cern.sparkrootapplications.examples.SparkPi
   mainApplicationFile: "<path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.1.0.jar"
   deps:
