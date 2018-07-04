@@ -33,6 +33,7 @@ spec:
     - scalability-test-eos-datasets.csv
      # save to local filesystem
     - file:///tmp/reduction-output
+     # spark measure output (e.g. s3a://)
     - file:///tmp/sparkmeasure-results
   deps:
     files:
@@ -47,6 +48,12 @@ spec:
     # ensure to have krb5cc_0 ticket inside your local HADOOP_CONF_DIR
     "spark.kubernetes.driverEnv.KRB5CCNAME": /etc/hadoop/conf/krb5cc_0
     "spark.executorEnv.KRB5CCNAME": /etc/hadoop/conf/krb5cc_0
+    # Specify number of executor containers triggered at the time
+    "spark.kubernetes.allocation.batch.size": "5"
+    # Cloud specific - need to run with speculation to avoid problems
+    "spark.speculation": "true"
+    "spark.speculation.multiplier": "3"
+    "spark.speculation.quantile": "0.9"
   driver:
     cores: 1
     coreLimit: "1000m"

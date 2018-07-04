@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# Example:
+# HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/tpcds-datagen.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
@@ -28,7 +30,7 @@ spec:
   mainClass: ch.cern.tpcds.DataGenTPCDS
   mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
   arguments:
-    # working directory (existing or not)
+    # working directory to write data
     - "s3a://<your-cluster-bucket>/TPCDS-TEST"
     # Path to kit in the docker image
     - "/opt/tpcds-kit/tools"
@@ -44,19 +46,21 @@ spec:
     - "true"
   deps:
     jars:
-      - <path-to>/spark-service/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
-      - <path-to>/spark-service/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+      - <path-to>/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
+      - <path-to>/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
   sparkConf:
     "spark.network.timeout": "1200"
+    # S3 Specific config, remove if not needed
     "fs.s3a.connection.timeout": "1200000"
     "fs.s3a.path.style.access": "true"
     "spark.hadoop.fs.s3a.connection.maximum": "200"
     "spark.hadoop.fs.s3a.fast.upload": "true"
-    "spark.hadoop.fs.s3a.multipart.size": "10485760"
-    "spark.hadoop.fs.s3a.multipart.threshold": "104857600"
-    "spark.storage.blockManagerTimeoutIntervalMs": "300000"
     "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version": "2"
-    "spark.hadoop.mapreduce.fileoutputcommitter.cleanup-failures.ignored": "true"
+    "spark.sql.parquet.mergeSchema": "false"
+    "spark.sql.parquet.filterPushdown": "true"
+    # For S3 writing, we need to disable speculation - requires manual monitoring of jobs using sparkctl forward <app>
+    # and kubectl cordon <node-id> to blacklist
+    "spark.speculation": "false"
   driver:
     cores: 4
     coreLimit: "4096m"

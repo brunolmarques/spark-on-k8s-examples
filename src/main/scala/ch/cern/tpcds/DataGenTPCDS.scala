@@ -8,7 +8,7 @@ import scala.util.Try
 
 object DataGenTPCDS {
   def main(args: Array[String]) {
-    val rootDir = args(0)
+    val tpcdsDataDir = args(0)
     val dsdgenDir = args(1)
     val scaleFactor = Try(args(2).toString).getOrElse("1")
     val genPartitions = Try(args(3).toInt).getOrElse(100)
@@ -16,10 +16,9 @@ object DataGenTPCDS {
     val clusterByPartitionColumns = Try(args(5).toBoolean).getOrElse(false)
     val onlyWarn = Try(args(6).toBoolean).getOrElse(false)
 
-    val tpcdsDir = s"$rootDir/tpcds"
     val format = "parquet"
 
-    println(s"ROOT DIR is $rootDir")
+    println(s"DATA DIR is $tpcdsDataDir")
     println(s"Tools dsdgen executable located in $dsdgenDir")
     println(s"Scale factor is $scaleFactor GB")
 
@@ -42,7 +41,7 @@ object DataGenTPCDS {
     println(s"Generating data")
 
     tables.genData(
-      location = tpcdsDir,
+      location = tpcdsDataDir,
       format = format,
       overwrite = true,
       partitionTables = partitionTables,
@@ -51,6 +50,6 @@ object DataGenTPCDS {
       tableFilter = "",
       numPartitions = genPartitions)
 
-    println(s"Data generated at $tpcdsDir")
+    println(s"Data generated at $tpcdsDataDir")
   }
 }
