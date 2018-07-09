@@ -31,7 +31,7 @@ spec:
   mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
   arguments:
     # working directory to write data
-    - "s3a://<your-cluster-bucket>/TPCDS-TEST"
+    - "s3a://{{ cluster-name }}/TPCDS-TEST"
     # Path to kit in the docker image
     - "/opt/tpcds-kit/tools"
     # Scale factor (in GB)
