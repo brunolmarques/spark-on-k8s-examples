@@ -77,11 +77,18 @@ object BenchmarkSparkSQL {
     val specificResultTable = spark.read.json(resultPath)
     specificResultTable.show()
 
-    val result = specificResultTable.withColumn("result", explode(col("results"))).withColumn("executionSeconds", col("result.executionTime")/1000).withColumn("queryName", col("result.name"))
+    val result = specificResultTable
+      .withColumn("result", explode(col("results")))
+      .withColumn("executionSeconds", col("result.executionTime")/1000)
+      .withColumn("queryName", col("result.name"))
     result.select("iteration", "queryName", "executionSeconds").show()
 
     println(s"Final results at $resultPath")
-    val aggResults = result.groupBy("queryName").agg(callUDF("percentile", col("executionSeconds").cast("long"), lit(0.5)).as('medianRuntimeSeconds)).orderBy(col("queryName"))
+    val aggResults = result.groupBy("queryName").agg(
+      callUDF("percentile", col("executionSeconds").cast("long"), lit(0.5)).as('medianRuntimeSeconds),
+      callUDF("min", col("executionSeconds").cast("long")).as('minRuntimeSeconds),
+      callUDF("max", col("executionSeconds").cast("long")).as('maxRuntimeSeconds)
+    ).orderBy(col("queryName"))
     aggResults.repartition(1).write.csv(s"$resultPath/csv")
     aggResults.show(105)
   }

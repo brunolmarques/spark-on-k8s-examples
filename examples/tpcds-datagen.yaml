@@ -28,7 +28,7 @@ spec:
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s-staging:v2.4.0
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.DataGenTPCDS
-  mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
   arguments:
     # working directory to write data
     - "s3a://<your-cluster-bucket>/TPCDS-TEST"
@@ -46,20 +46,19 @@ spec:
     - "true"
   deps:
     jars:
-      - <path-to>/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
-      - <path-to>/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+      - {{ path-to-examples }}/libs/scala-logging_2.11-3.9.0.jar
+      - {{ path-to-examples }}/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
   sparkConf:
     "spark.network.timeout": "1200"
-    # S3 Specific config, remove if not needed
-    "fs.s3a.connection.timeout": "1200000"
-    "fs.s3a.path.style.access": "true"
+    # S3 Specific config (remove if s3 not used)
+    "spark.hadoop.fs.s3a.connection.timeout": "1200000"
+    "spark.hadoop.fs.s3a.path.style.access": "true"
     "spark.hadoop.fs.s3a.connection.maximum": "200"
     "spark.hadoop.fs.s3a.fast.upload": "true"
     "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version": "2"
     "spark.sql.parquet.mergeSchema": "false"
     "spark.sql.parquet.filterPushdown": "true"
-    # For S3 writing, we need to disable speculation - requires manual monitoring of jobs using sparkctl forward <app>
-    # and kubectl cordon <node-id> to blacklist
+    # For S3 writing, we need to disable speculation to have consistent writes
     "spark.speculation": "false"
   driver:
     cores: 4

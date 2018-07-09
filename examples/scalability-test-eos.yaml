@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# Example:
+# HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/scalability-test-eos.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
@@ -25,19 +27,19 @@ spec:
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:v2.4.0
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.sparkrootapplications.examples.DimuonReductionAODMultiDataset
-  mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
   arguments:
      # Note that this file has to be submitted to driver by deps->files,
      # and then fetched in application with SparkFiles to executors
      # val configClusterFilePath = SparkFiles.get(configFileName)
     - scalability-test-eos-datasets.csv
-     # save to local filesystem
+     # save to local filesystem (e.g. s3a://)
     - file:///tmp/reduction-output
      # spark measure output (e.g. s3a://)
     - file:///tmp/sparkmeasure-results
   deps:
     files:
-      - <path-to>/spark-service-examples/examples/scalability-test-eos-datasets.csv
+      - {{ path-to-examples }}/examples/scalability-test-eos-datasets.csv
     jars:
       - http://central.maven.org/maven2/org/diana-hep/root4j/0.1.6/root4j-0.1.6.jar
       - http://central.maven.org/maven2/org/apache/bcel/bcel/5.2/bcel-5.2.jar
@@ -51,6 +53,7 @@ spec:
     # Specify number of executor containers triggered at the time
     "spark.kubernetes.allocation.batch.size": "5"
     # Cloud specific - need to run with speculation to avoid problems
+    # With speculation and S3, ensure to have proper flags set - check s3-example.yaml
     "spark.speculation": "true"
     "spark.speculation.multiplier": "3"
     "spark.speculation.quantile": "0.9"

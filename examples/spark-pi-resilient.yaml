@@ -17,7 +17,7 @@
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
 metadata:
-  name: cluster-init-job
+  name: spark-pi
   namespace: default
 spec:
   type: Scala
@@ -26,21 +26,22 @@ spec:
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.sparkrootapplications.examples.SparkPi
   mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
-  arguments:
-   - "<some-large-number-tasks-over-100000>"
   sparkConf:
-    "spark.kubernetes.allocation.batch.size": "<number-of-nodes>"
+    "deploy-mode": "client"
   driver:
-    cores: 2
-    coreLimit: "2000m"
-    memory: "4024m"
+    cores: 1
+    coreLimit: "1000m"
+    memory: "1024m"
     labels:
       version: 2.4.0
     serviceAccount: spark
   executor:
-    instances: "<number-of-nodes>"
+    instances: 1
     cores: 1
-    memory: "<max-memory-of-nodes>"
+    memory: "2048m"
     labels:
       version: 2.4.0
-  restartPolicy: Never
+  # Available values: Always, OnFailure, and Never
+  # OnFailure will ensure that application get resubmitted on driver failure
+  # NOTE: requires client mode!
+  restartPolicy: OnFailure

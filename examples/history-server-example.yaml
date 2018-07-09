@@ -17,26 +17,25 @@
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
 metadata:
-  name: spark-pi
+  name: {{ application-name }}
   namespace: default
 spec:
   type: Scala
   mode: cluster
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:v2.4.0
   imagePullPolicy: IfNotPresent
-  mainClass: ch.cern.sparkrootapplications.examples.SparkPi
-  mainApplicationFile: "<path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.1.0.jar"
-  deps:
-    files:
-      - "<path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.1.0.jar"
-  # Required for custom --upload-to and using custom spark-event-log
-  hadoopConf:
-    "fs.s3a.endpoint": {{ endpoint }}
-    "fs.s3a.access.key": {{ access }}
-    "fs.s3a.secret.key": {{ secret }}
+  mainClass: {{ application-class }}
+  mainApplicationFile: {{ path-to-your-application-jar }}
   sparkConf:
+    # By default, using cern provided spark-operator,
+    # you are authenticated to use bucket of your cluster {{ cluster-name }}
     "spark.eventLog.enabled": "true"
     "spark.eventLog.dir": s3a://{{ cluster-name }}/spark-events
+    # S3 specific for output and spark event log - works well with large files, and spark.speculation
+    "spark.hadoop.fs.s3a.connection.timeout": "1200000"
+    "spark.hadoop.fs.s3a.committer.name": "directory"
+    "spark.hadoop.fs.s3a.committer.staging.conflict-mode": "append"
+    "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a": "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"
   driver:
     cores: 1
     coreLimit: "1000m"

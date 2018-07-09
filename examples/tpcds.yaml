@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 # Example:
-# HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/tpcds.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
+# HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/tpcds-s3.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
@@ -28,18 +28,20 @@ spec:
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s-staging:v2.4.0
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.BenchmarkSparkSQL
-  mainApplicationFile: <path-to>/spark-service-examples/target/scala-2.11/spark-service-examples_2.11-0.2.0.jar
+  mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
   arguments:
+    # By default, using cern provided spark-operator,
+    # you are authenticated to use bucket of your cluster {{ cluster-name }}
     # working directory where data table reside (must exists and have tables directly)
-    - "s3a:///<your-cluster-bucket>/TPCDS-TEST"
+    - "s3a:///{{ cluster-name }}/TPCDS-TEST"
     # location to store results
-    - "s3a:///<your-cluster-bucket>/TPCDS-TEST-RESULT"
+    - "s3a:///{{ cluster-name }}/TPCDS-TEST-RESULT"
     # Path to kit in the docker image
     - "/opt/tpcds-kit/tools"
     # Scale factor (in GB)
     - "1"
     # Number of iterations
-    - "3"
+    - "1"
     # Optimize queries
     - "false"
     # Filter queries, will run all if empty - "q23a-v2.4,q23b-v2.4"
@@ -48,24 +50,30 @@ spec:
     - "true"
   deps:
     jars:
-      - <path-to>/spark-service-examples/libs/scala-logging_2.11-3.9.0.jar
-      - <path-to>/spark-service-examples/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+      - {{ path-to-examples }}/libs/scala-logging_2.11-3.9.0.jar
+      - {{ path-to-examples }}/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
   sparkConf:
-    # Cloud specific - need to run with speculation to avoid problems
+    # Enable event log
+    "spark.eventLog.enabled": "true"
+    "spark.eventLog.dir": s3a://{{ cluster-name }}/spark-events
+    # Cloud specific - need to run with speculation to avoid strugglers
     "spark.speculation": "true"
     "spark.speculation.multiplier": "3"
     "spark.speculation.quantile": "0.9"
     # TPCDs Specific
     "spark.sql.broadcastTimeout": "7200"
     "spark.sql.crossJoin.enabled": "true"
-    # S3 Specific config, remove if not needed (s3 not used)
-    "fs.s3a.connection.timeout": "1200000"
-    "fs.s3a.path.style.access": "true"
+    # S3 Specific config (remove if s3 not used)
+    # We need it to speed up uploads, and outputcommiter/parquet to have consistent writes due to speculation
+    "spark.hadoop.fs.s3a.connection.timeout": "1200000"
+    "spark.hadoop.fs.s3a.path.style.access": "true"
     "spark.hadoop.fs.s3a.connection.maximum": "200"
     "spark.hadoop.fs.s3a.fast.upload": "true"
-    "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version": "2"
     "spark.sql.parquet.mergeSchema": "false"
     "spark.sql.parquet.filterPushdown": "true"
+    "spark.hadoop.fs.s3a.committer.name": "directory"
+    "spark.hadoop.fs.s3a.committer.staging.conflict-mode": "append"
+    "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a": "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"
   driver:
     cores: 4
     coreLimit: "4096m"

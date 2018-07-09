@@ -13,27 +13,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Example:
-# ./sparkctl create ./jobs/spark-pi-deps.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
 metadata:
-  name: spark-pi
+  name: {{ application-name }}
   namespace: default
 spec:
   type: Scala
   mode: cluster
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:v2.4.0
   imagePullPolicy: IfNotPresent
-  mainClass: ch.cern.sparkrootapplications.examples.SparkPi
-  # By default, using cern provided spark-operator,
-  # you are authenticated to use bucket of your cluster {{ cluster-name }}
-  # Thus, if you uploaded dependencies to that cluster, you are authenticated already
-  mainApplicationFile: {{ path-to-examples }}/libs/spark-service-examples_2.11-0.2.0.jar
-  deps:
-    files:
-      - {{ path-to-examples }}/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+  mainClass: {{ application-class }}
+  mainApplicationFile: {{ path-to-your-application-jar }}
+  hadoopConf:
+    # By default, using cern provided spark-operator,
+    # you are authenticated to use bucket of your cluster {{ cluster-name }}
+    # This settings allow you to authenticate to custom bucket {{ custom-bucket }} in cs3.cern.ch endpoint
+    "fs.s3a.bucket.{{ custom-bucket }}.access.key": {{ access }}
+    "fs.s3a.bucket.{{ custom-bucket }}.secret.key": {{ secret }}
+  sparkConf:
+    # Export logs to history server
+    "spark.eventLog.enabled": "true"
+    "spark.eventLog.dir": s3a://{{ cluster-name }}/spark-events
+    # S3 specific for consistent output and spark events, in case of speculation
+    "spark.hadoop.fs.s3a.committer.name": "directory"
+    "spark.hadoop.fs.s3a.committer.staging.conflict-mode": "append"
+    "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a": "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"
   driver:
     cores: 1
     coreLimit: "1000m"
