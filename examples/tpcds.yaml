@@ -25,7 +25,7 @@ spec:
   type: Scala
   mode: cluster
   # Use staging (tpcds image)
-  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s-staging:v2.4.0
+  image:d
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.BenchmarkSparkSQL
   mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"

@@ -22,7 +22,7 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark-on-k8s:v2.4.0
+  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1
   imagePullPolicy: IfNotPresent
   mainClass: {{ application-class }}
   mainApplicationFile: {{ path-to-your-application-jar }}
