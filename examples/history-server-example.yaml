@@ -26,6 +26,7 @@ spec:
   imagePullPolicy: IfNotPresent
   mainClass: {{ application-class }}
   mainApplicationFile: {{ path-to-your-application-jar }}
+  mode: cluster
   sparkConf:
     # By default, using cern provided spark-operator,
     # you are authenticated to use bucket of your cluster {{ cluster-name }}

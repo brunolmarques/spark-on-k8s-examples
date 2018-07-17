@@ -28,21 +28,22 @@ spec:
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1-tpcds
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.DataGenTPCDS
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
+  mainApplicationFile: "{{ path-to-examples }}/libs/spark-service-examples_2.11-0.2.0.jar"
+  mode: cluster
   arguments:
-    # working directory to write data
+  # working directory to write data
     - "s3a://{{ cluster-name }}/TPCDS-TEST"
-    # Path to kit in the docker image
+  # Path to kit in the docker image
     - "/opt/tpcds-kit/tools"
-    # Scale factor (in GB)
+  # Scale factor (in GB)
     - "1"
-    # Generate data num partitions
+  # Generate data num partitions
     - "100"
-    # Create the partitioned fact tables
+  # Create the partitioned fact tables
     - "false"
-    # Shuffle to get partitions coalesced into single files.
+  # Shuffle to get partitions coalesced into single files.
     - "false"
-    # Logging set to WARN
+  # Logging set to WARN
     - "true"
   deps:
     jars:

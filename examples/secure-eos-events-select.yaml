@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 # Example:
+# kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user-name>
 # HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/secure-eos-events-select.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
@@ -28,10 +29,13 @@ spec:
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.sparkrootapplications.examples.EventsSelect
   mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
+  mode: cluster
   arguments:
     - "root://eosuser.cern.ch/eos/user/p/pmrowczy/Shared/evsel.root"
   deps:
     jars:
+      # WARN - diana-hep/root4j package resets configs spark.hadoop on executors!!
+      # WARN - must be specified in HADOOP_CONF_DIR in core-site.xml - ref https://github.com/diana-hep/root4j/issues/3
       - http://central.maven.org/maven2/org/diana-hep/root4j/0.1.6/root4j-0.1.6.jar
       - http://central.maven.org/maven2/org/apache/bcel/bcel/5.2/bcel-5.2.jar
       - http://central.maven.org/maven2/org/diana-hep/spark-root_2.11/0.1.16/spark-root_2.11-0.1.16.jar

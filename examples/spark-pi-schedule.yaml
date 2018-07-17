@@ -29,6 +29,7 @@ spec:
     imagePullPolicy: IfNotPresent
     mainClass: ch.cern.sparkrootapplications.examples.SparkPi
     mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
+    mode: cluster
     driver:
       cores: 0.1
       coreLimit: "200m"

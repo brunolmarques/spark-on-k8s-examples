@@ -14,6 +14,7 @@
 # limitations under the License.
 #
 # Example:
+# kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user-name>
 # HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/scalability-test-eos.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
@@ -28,6 +29,7 @@ spec:
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.sparkrootapplications.examples.DimuonReductionAODMultiDataset
   mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
+  mode: cluster
   arguments:
      # Note that this file has to be submitted to driver by deps->files,
      # and then fetched in application with SparkFiles to executors
@@ -43,6 +45,8 @@ spec:
     jars:
       - http://central.maven.org/maven2/org/diana-hep/root4j/0.1.6/root4j-0.1.6.jar
       - http://central.maven.org/maven2/org/apache/bcel/bcel/5.2/bcel-5.2.jar
+      # WARN - diana-hep/spark-root_2.11 package resets configs spark.hadoop on executors!!
+      # WARN - must be specified in HADOOP_CONF_DIR in core-site.xml - ref https://github.com/diana-hep/root4j/issues/3
       - http://central.maven.org/maven2/org/diana-hep/spark-root_2.11/0.1.16/spark-root_2.11-0.1.16.jar
       - http://central.maven.org/maven2/ch/cern/sparkmeasure/spark-measure_2.11/0.11/spark-measure_2.11-0.11.jar
   sparkConf:

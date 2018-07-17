@@ -28,25 +28,26 @@ spec:
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1-tpcds
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.BenchmarkSparkSQL
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
+  mainApplicationFile: "{{ path-to-examples }}/libs/spark-service-examples_2.11-0.2.0.jar"
+  mode: cluster
+  # By default, using cern provided spark-operator,
+  # you are authenticated to use bucket of your cluster {{ cluster-name }} using s3a://
   arguments:
-    # By default, using cern provided spark-operator,
-    # you are authenticated to use bucket of your cluster {{ cluster-name }}
-    # working directory where data table reside (must exists and have tables directly)
+  # working directory where data table reside (must exists and have tables directly)
     - "s3a:///{{ cluster-name }}/TPCDS-TEST"
-    # location to store results
+  # location to store results
     - "s3a:///{{ cluster-name }}/TPCDS-TEST-RESULT"
-    # Path to kit in the docker image
+  # Path to kit in the docker image
     - "/opt/tpcds-kit/tools"
-    # Scale factor (in GB)
+  # Scale factor (in GB)
     - "1"
-    # Number of iterations
+  # Number of iterations
     - "1"
-    # Optimize queries
+  # Optimize queries
     - "false"
-    # Filter queries, will run all if empty - "q23a-v2.4,q23b-v2.4"
+  # Filter queries, will run all if empty - "q23a-v2.4,q23b-v2.4"
     - ""
-    # Logging set to WARN
+  # Logging set to WARN
     - "true"
   deps:
     jars:
