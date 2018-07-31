@@ -181,6 +181,12 @@ Submit your application with custom hadoop config directory to authenticate EOS
 $ HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/secure-eos-events-select.yaml
 ```
 
+**Python example**
+
+```
+$ ./sparkctl create ./jobs/spark-pyfiles.yaml
+```
+
 **Scalability tests example**
 
 ```
@@ -203,19 +209,6 @@ $ HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/scalability-test-eo
 ```
 Submit your TPCDS jobs (this will submit examples from target dir, and from libs folder
 $ ./sparkctl create ./jobs/tpcds.yaml --upload-to s3a://<your-cluster-name> --override --endpoint-url "https://cs3.cern.ch"
-```
-
-```
-To perform complex analysis
-$ spark-shell --jars /data/libs/scala-logging_2.11-3.9.0.jar,/data/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
-$
-$ sc.hadoopConfiguration.set("fs.s3a.access.key", "redacted")
-$ sc.hadoopConfiguration.set("fs.s3a.secret.key", "redacted")
-$ sc.hadoopConfiguration.set("fs.s3a.endpoint", "cs3.cern.ch")
-$ val resultPath = "s3a://spark-on-k8s-cluster/TPCDS/tpcds_result/timestamp=1530032577241"
-$ val specificResultTable = spark.read.json(resultPath)
-$ specificResultTable.show()
-$ ...more hints at https://github.com/databricks/spark-sql-perf/blob/master/src/main/notebooks/performance.dashboard.scala
 ```
 
 ### Building examples jars

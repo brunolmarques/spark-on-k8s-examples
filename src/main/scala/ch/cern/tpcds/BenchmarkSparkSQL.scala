@@ -64,6 +64,11 @@ object BenchmarkSparkSQL {
       case _ => tpcds.tpcds2_4Queries.filter(q => query_filter.contains(q.name))
     }
 
+    // Start collection SparkMeasure
+    val stageMetrics = ch.cern.sparkmeasure.StageMetrics(spark)
+    stageMetrics.begin()
+
+    // Start experiment
     val experiment = tpcds.runExperiment(
       filtered_queries,
       iterations = iterations,
@@ -72,24 +77,30 @@ object BenchmarkSparkSQL {
 
     experiment.waitForFinish(timeout)
 
+    // Collect general results
     val resultPath = experiment.resultPath
     println(s"Reading result at $resultPath")
     val specificResultTable = spark.read.json(resultPath)
     specificResultTable.show()
 
+    // Summarize results
     val result = specificResultTable
       .withColumn("result", explode(col("results")))
       .withColumn("executionSeconds", col("result.executionTime")/1000)
       .withColumn("queryName", col("result.name"))
     result.select("iteration", "queryName", "executionSeconds").show()
-
     println(s"Final results at $resultPath")
     val aggResults = result.groupBy("queryName").agg(
       callUDF("percentile", col("executionSeconds").cast("long"), lit(0.5)).as('medianRuntimeSeconds),
       callUDF("min", col("executionSeconds").cast("long")).as('minRuntimeSeconds),
       callUDF("max", col("executionSeconds").cast("long")).as('maxRuntimeSeconds)
     ).orderBy(col("queryName"))
-    aggResults.repartition(1).write.csv(s"$resultPath/csv")
+    aggResults.repartition(1).write.csv(s"$resultPath/summary.csv")
     aggResults.show(105)
+
+    // Collect SparkMeasure
+    stageMetrics.end()
+    stageMetrics.printReport()
+    spark.table("PerfStageMetrics").repartition(1).write.format("csv").option("header", "true").save(s"$resultPath/sparkmeasure.csv")
   }
 }

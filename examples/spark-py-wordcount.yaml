@@ -1,5 +1,5 @@
 #
-# Copyright 2018 CERN/Switzerland
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,31 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# Support for Python is experimental, and requires building SNAPSHOT image of Apache Spark,
+# with `imagePullPolicy` set to Always
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
 metadata:
-  name: spark-pi
+  name: py-wordcount
   namespace: default
 spec:
-  type: Scala
+  type: Python
+  pythonVersion: "2"
   mode: cluster
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1
   imagePullPolicy: Always
-  mainClass: ch.cern.sparkrootapplications.examples.SparkPi
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
-  mode: cluster
+  mainApplicationFile: {{ path-to-examples }}/src/main/python/wordcount-with-deps.py
+  deps:
+    pyfiles:
+       - {{ path-to-examples }}/libs/wordcount_python_job.zip
   driver:
     cores: 1
     coreLimit: "1000m"
-    memory: "1024m"
+    memory: "2000m"
     labels:
       version: 2.4.0
     serviceAccount: spark
   executor:
-    instances: 1
     cores: 1
-    memory: "2048m"
+    instances: 1
+    memory: "2000m"
     labels:
       version: 2.4.0
   restartPolicy: Never
