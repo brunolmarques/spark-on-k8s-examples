@@ -7,13 +7,12 @@ Collection of stable application's examples for spark on kubernetes service
 
 - [Prerequisites](#prerequisites)
 - [Create and manage Spark on Kubernetes cluster](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl)
-- [Submitting Spark applications]()
+- [Submitting Spark applications](#submitting-spark-applications)
 - [Building examples jars](#building-examples-jars)
-- [Legacy: Spark cluster management and submitting applications using legacy cern-spark-service](docs/spark-k8s-2.2.0-fork.md)
 
 ### Prerequisites
 
-1. **Install spark-on-k8s on Kubernetes cluster with Initializers enabled**
+1. **Install spark-on-k8s on Kubernetes cluster with MutatingAdmissionWebhook enabled**
 
     NOTE: if you already have cluster created, skip
     
@@ -136,28 +135,33 @@ $ kubectl describe sparkapplication spark-pi
 For more details regarding `sparkctl`, and more detailed user guide, 
 please visit [sparkctl user-guide](https://github.com/cerndb/spark-on-k8s-operator/tree/master/sparkctl)
 
-**Creating application with local dependencies**
-
-In order to submit application with local dependencies, and have your spark-job fully-resilient to failures, 
-they need to be staged at e.g. S3.
-
-You would need to create an authentication file with cretentials on your filesystem:
+**Python example**
 
 ```
-$ vi ~/.aws/credentials
+$ ./sparkctl create ./jobs/spark-pyfiles.yaml
+```
 
-[default]
-aws_access_key_id = <redacted>
-aws_secret_access_key = <redacted>
-``` 
+**TPCDS example**
 
-After that, you will be able to submit applications with local dependencies, as shown in example `examples/spark-pi-deps.yaml` 
+```
+Submit your TPCDS jobs (this will submit examples from target dir, and from libs folder
+$ ./sparkctl create ./jobs/tpcds.yaml
+```
 
-```bash
+**Creating application with local dependencies**
+
+Dependencies can be stage building a custom Docker file e.g. [Examples Dockerfile](Dockerfile),
+or via staging dependencies in high-availability storage as S3 or GCS. 
+
+In order to submit application with local dependencies to S3, 
+access key, secret and endpoint have to be specified:
+```
+$ export AWS_ACCESS_KEY_ID=<redacted>
+$ export AWS_SECRET_ACCESS_KEY=<redacted>
 $ ./sparkctl create ./jobs/spark-pi-deps.yaml \
 --upload-to s3a://<your-cluster-name> \
 --override \
---endpoint-url "https://cs3.cern.ch"
+--upload-to-endpoint "https://cs3.cern.ch"
 ```
 
 NOTE: Command `opsparkctl create spark` will automatically create S3 bucket for the cluster.
@@ -179,36 +183,6 @@ $ kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user>
 ```
 Submit your application with custom hadoop config directory to authenticate EOS
 $ HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/secure-eos-events-select.yaml
-```
-
-**Python example**
-
-```
-$ ./sparkctl create ./jobs/spark-pyfiles.yaml
-```
-
-**Scalability tests example**
-
-```
-Create hadoop config dir and put your kerberos cache there
-$ kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user>
-```
-```
-Edit your scalability-test dataset
-- 2,5GB: 101,SingleMu_Run2012C,1,root://eospublic.cern.ch/eos/opendata/cms/Run2012C/SingleMu/AOD/22Jan2013-v1/30010
-- 20TB: 101,SingleMu_Run2012C,1,root://eospublic.cern.ch/eos/opendata/cms/Run2012C/SingleMu/AOD/22Jan2013-v1/*0*/
-$ vi ./examples/scalability-test-eos-datasets.csv
-```
-```
-Submit your application with custom hadoop config directory to authenticate EOS
-$ HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/scalability-test-eos.yaml --upload-to s3a://<your-cluster-name> --override --endpoint-url "https://cs3.cern.ch"
-```
-
-**TPCDS example**
-
-```
-Submit your TPCDS jobs (this will submit examples from target dir, and from libs folder
-$ ./sparkctl create ./jobs/tpcds.yaml --upload-to s3a://<your-cluster-name> --override --endpoint-url "https://cs3.cern.ch"
 ```
 
 ### Building examples jars

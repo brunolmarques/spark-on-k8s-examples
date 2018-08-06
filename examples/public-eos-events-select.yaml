@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 # Example:
-# ./sparkctl create ./jobs/public-eos-events-select.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
+# ./sparkctl create ./jobs/public-eos-events-select.yaml
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
@@ -24,10 +24,10 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1
+  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1-examples
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.sparkrootapplications.examples.EventsSelect
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
+  mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
   mode: cluster
   arguments:
     - "root://eospublic.cern.ch://eos/opendata/cms/Run2010B/MuOnia/AOD/Apr21ReReco-v1/0000/FEF1B99B-BF77-E011-B0A0-E41F1318174C.root"

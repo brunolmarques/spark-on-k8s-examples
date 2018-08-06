@@ -25,10 +25,10 @@ spec:
   type: Scala
   mode: cluster
   # Use staging (tpcds image)
-  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1
+  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1-examples
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.DataGenTPCDS
-  mainApplicationFile: "{{ path-to-examples }}/libs/spark-service-examples_2.11-0.2.0.jar"
+  mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
   mode: cluster
   arguments:
   # working directory to write data
@@ -47,8 +47,8 @@ spec:
     - "true"
   deps:
     jars:
-      - {{ path-to-examples }}/libs/scala-logging_2.11-3.9.0.jar
-      - {{ path-to-examples }}/libs/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+      - local:///opt/spark/examples/jars/scala-logging_2.11-3.9.0.jar
+      - local:///opt/spark/examples/jars/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
   sparkConf:
     "spark.network.timeout": "1200"
     # S3 Specific config (remove if s3 not used)
@@ -69,7 +69,7 @@ spec:
       version: 2.4.0
     serviceAccount: spark
   executor:
-    instances: 50
+    instances: 5
     cores: 2
     memory: "6000m"
     labels:

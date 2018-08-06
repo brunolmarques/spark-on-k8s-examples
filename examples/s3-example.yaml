@@ -13,6 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# Example:
+# export AWS_ACCESS_KEY_ID=<redacted>
+# export AWS_SECRET_ACCESS_KEY=<redacted>
+# ./sparkctl create ./jobs/s3-example.yaml -u s3a://spark-on-k8s-cluster -o -e "https://cs3.cern.ch"
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication

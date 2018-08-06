@@ -15,7 +15,7 @@
 #
 # Example:
 # kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user-name>
-# HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/secure-eos-events-select.yaml --upload-to s3a://spark-on-k8s-cluster --override --endpoint-url "https://cs3.cern.ch"
+# HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/secure-eos-events-select.yaml
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
@@ -25,10 +25,10 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1
+  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1-examples
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.sparkrootapplications.examples.EventsSelect
-  mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
+  mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
   mode: cluster
   arguments:
     - "root://eosuser.cern.ch/eos/user/p/pmrowczy/Shared/evsel.root"

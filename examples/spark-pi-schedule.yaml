@@ -25,10 +25,10 @@ spec:
   template:
     type: Scala
     mode: cluster
-    image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1
+    image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1-examples
     imagePullPolicy: IfNotPresent
     mainClass: ch.cern.sparkrootapplications.examples.SparkPi
-    mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
+    mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
     mode: cluster
     driver:
       cores: 0.1
