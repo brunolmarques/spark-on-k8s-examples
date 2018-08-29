@@ -16,7 +16,7 @@
 # Example:
 # export AWS_ACCESS_KEY_ID=<redacted>
 # export AWS_SECRET_ACCESS_KEY=<redacted>
-# ./sparkctl create ./jobs/s3-example.yaml -u s3a://spark-on-k8s-cluster -o -e "https://cs3.cern.ch"
+# ./sparkctl create ./jobs/history-server-example.yaml -u s3a://spark-on-k8s-cluster -o -e "https://cs3.cern.ch"
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
@@ -35,13 +35,16 @@ spec:
     # By default, using cern provided spark-operator,
     # you are authenticated to use bucket of your cluster {{ cluster-name }}
     # This settings allow you to authenticate to custom bucket {{ custom-bucket }} in cs3.cern.ch endpoint
+    "fs.s3a.endpoint": {{ endpoint }}
     "fs.s3a.bucket.{{ custom-bucket }}.access.key": {{ access }}
     "fs.s3a.bucket.{{ custom-bucket }}.secret.key": {{ secret }}
   sparkConf:
-    # Export logs to history server
+    # By default, using cern provided spark-operator,
+    # you are authenticated to use bucket of your cluster {{ cluster-name }}
     "spark.eventLog.enabled": "true"
-    "spark.eventLog.dir": s3a://{{ cluster-name }}/spark-events
-    # S3 specific for consistent output and spark events, in case of speculation
+    "spark.eventLog.dir": s3a://{{ custom-bucket }}/spark-events
+    # S3 specific for output and spark event log - works well with large files, and spark.speculation
+    "spark.hadoop.fs.s3a.connection.timeout": "1200000"
     "spark.hadoop.fs.s3a.committer.name": "directory"
     "spark.hadoop.fs.s3a.committer.staging.conflict-mode": "append"
     "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a": "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"

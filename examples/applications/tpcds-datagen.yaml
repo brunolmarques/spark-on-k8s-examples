@@ -14,72 +14,60 @@
 # limitations under the License.
 #
 # Example:
-# HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/tpcds.yaml
+# ./sparkctl create ./jobs/tpcds-datagen.yaml
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
 metadata:
-  name: tpcds
+  name: tpcds-data-gen
   namespace: default
 spec:
   type: Scala
   mode: cluster
+  # Use staging (tpcds image)
   image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1-examples
   imagePullPolicy: IfNotPresent
-  mainClass: ch.cern.tpcds.BenchmarkSparkSQL
+  mainClass: ch.cern.tpcds.DataGenTPCDS
   mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
   mode: cluster
-  # By default, using cern provided spark-operator,
-  # you are authenticated to use bucket of your cluster {{ cluster-name }} using s3a://
   arguments:
-  # working directory where data table reside (must exists and have tables directly)
-    - "s3a://spark-on-k8s-cluster/TPCDS-1GB"
-  # location to store results
-    - "s3a://spark-on-k8s-cluster/TPCDS-TEST-RESULT"
-#  # working directory where data table reside (must exists and have tables directly)
-#    - "s3a:///{{ cluster-name }}/TPCDS-TEST"
-#  # location to store results
-#    - "s3a:///{{ cluster-name }}/TPCDS-TEST-RESULT"
+  # working directory to write data
+    - "s3a://{{ custom-bucket }}/TPCDS-TEST"
   # Path to kit in the docker image
     - "/opt/tpcds-kit/tools"
   # Scale factor (in GB)
     - "1"
-  # Number of iterations
-    - "1"
-  # Optimize queries
+  # Generate data num partitions
+    - "100"
+  # Create the partitioned fact tables
     - "false"
-  # Filter queries, will run all if empty - "q23a-v2.4,q23b-v2.4"
-    - ""
+  # Shuffle to get partitions coalesced into single files.
+    - "false"
   # Logging set to WARN
     - "true"
   deps:
     jars:
       - local:///opt/spark/examples/jars/scala-logging_2.11-3.9.0.jar
       - local:///opt/spark/examples/jars/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
-      - local:///opt/spark/examples/jars/spark-measure_2.11-0.11.jar
+  hadoopConf:
+    # By default, using cern provided spark-operator,
+    # you are authenticated to use bucket of your cluster {{ cluster-name }}
+    # This settings allow you to authenticate to custom bucket {{ custom-bucket }} in cs3.cern.ch endpoint
+    "fs.s3a.endpoint": {{ endpoint }}
+    "fs.s3a.bucket.{{ custom-bucket }}.access.key": {{ access }}
+    "fs.s3a.bucket.{{ custom-bucket }}.secret.key": {{ secret }}
   sparkConf:
-    # Enable event log
-    "spark.eventLog.enabled": "true"
-    "spark.eventLog.dir": s3a://spark-on-k8s-cluster/spark-events
-#    "spark.eventLog.dir": s3a://{{ cluster-name }}/spark-events
-    # Cloud specific - need to run with speculation to avoid strugglers
-    "spark.speculation": "true"
-    "spark.speculation.multiplier": "3"
-    "spark.speculation.quantile": "0.9"
-    # TPCDs Specific
-    "spark.sql.broadcastTimeout": "7200"
-    "spark.sql.crossJoin.enabled": "true"
+    "spark.network.timeout": "1200"
     # S3 Specific config (remove if s3 not used)
-    # We need it to speed up uploads, and outputcommiter/parquet to have consistent writes due to speculation
     "spark.hadoop.fs.s3a.connection.timeout": "1200000"
     "spark.hadoop.fs.s3a.path.style.access": "true"
     "spark.hadoop.fs.s3a.connection.maximum": "200"
     "spark.hadoop.fs.s3a.fast.upload": "true"
+    "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version": "2"
     "spark.sql.parquet.mergeSchema": "false"
     "spark.sql.parquet.filterPushdown": "true"
-    "spark.hadoop.fs.s3a.committer.name": "directory"
-    "spark.hadoop.fs.s3a.committer.staging.conflict-mode": "append"
-    "spark.hadoop.mapreduce.outputcommitter.factory.scheme.s3a": "org.apache.hadoop.fs.s3a.commit.S3ACommitterFactory"
+    # For S3 writing, we need to disable speculation to have consistent writes
+    "spark.speculation": "false"
   driver:
     cores: 4
     coreLimit: "4096m"
@@ -89,8 +77,8 @@ spec:
     serviceAccount: spark
   executor:
     instances: 5
-    cores: 4
-    memory: "5000m"
+    cores: 2
+    memory: "6000m"
     labels:
       version: 2.4.0
   restartPolicy: Never

@@ -1,48 +1,28 @@
-# Spark on Kubernetes documentation
+# Spark on Kubernetes examples
 
 Collection of stable application's examples for spark on kubernetes service 
-(including managing the cluster, fetching local configuration and submitting Spark jobs) 
 
 ### Table of Contents
 
 - [Prerequisites](#prerequisites)
 - [Create and manage Spark on Kubernetes cluster](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl)
 - [Submitting Spark applications](#submitting-spark-applications)
-- [Building examples jars](#building-examples-jars)
 
 ### Prerequisites
 
-1. **Install spark-on-k8s on Kubernetes cluster with MutatingAdmissionWebhook enabled**
+1. **Install Kubernetes cluster with MutatingAdmissionWebhook enabled**
 
     NOTE: if you already have cluster created, skip
     
-    For Openstack you can use dedicated python tool [opsparkctl](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl).
-    However, if you have on-premise kubernetes cluster, check [manual spark-on-k8s installation for on-premise](docs/spark-k8s-cluster.md)
-
-2. **Fetch cluster configuration to be able to use sparkctl/kubectl**
-
-    For Openstack, you can use [opsparkctl create local-kube-config](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl). 
-    However, if you have on-premise kubernetes cluster, check [manual kubectl config](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters)
+2. **Fetch cluster configuration to be able to use helm/kubectl/sparkctl**
 
     After successfull configuration, such a files should be found in `~/.kube` folder locally:
     ```
     config    ca.pem    cert.pem    key.pem
     ```
 
-3. **If you use Openstack, check your cluster status**
+3. **Create Spark on K8S Operator in the cluster**
     
-    You can check cluster status by [opsparkctl status](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl). 
-    The following output should be displayed:
-    
-    ```
-    [Kubernetes client configuration..]
-    Kubernetes config used: /Users/pmrowczy/.kube/config
-    Kubernetes cluster name: spark-cluster-test
-    Kubernetes master: https://137.138.157.26:6443
-    
-    [Spark status..]
-    SPARK HISTORY: http://137.138.157.31:30968
-    ```
 
 ### Submitting Spark applications
 
@@ -98,10 +78,11 @@ To delete application
 $ ./sparkctl delete spark-pi
 ```
 
+
 Check if your driver/executors are correctly created
 
 ```
-$ kubectl get pods --watch -n default
+$ ./sparkctl event spark-pi
 ```
 
 To get application logs
@@ -125,6 +106,8 @@ $ ./sparkctl forward spark-pi
 Alternatively, to check application status (or check created pods and their status)
 
 ```
+$ kubectl get pods -n default
+or
 $ kubectl describe pod spark-pi-1528991055721-driver
 or
 $ kubectl logs spark-pi-1528991055721-driver
@@ -144,31 +127,37 @@ $ ./sparkctl create ./jobs/spark-pyfiles.yaml
 **TPCDS example**
 
 ```
-Submit your TPCDS jobs (this will submit examples from target dir, and from libs folder
 $ ./sparkctl create ./jobs/tpcds.yaml
 ```
 
-**Creating application with local dependencies**
+**Local Dependencies example**
 
 Dependencies can be stage building a custom Docker file e.g. [Examples Dockerfile](Dockerfile),
 or via staging dependencies in high-availability storage as S3 or GCS. 
 
 In order to submit application with local dependencies to S3, 
-access key, secret and endpoint have to be specified:
+access key, secret and endpoint have to be specified (both during submission and in job specification):
 ```
 $ export AWS_ACCESS_KEY_ID=<redacted>
 $ export AWS_SECRET_ACCESS_KEY=<redacted>
 $ ./sparkctl create ./jobs/spark-pi-deps.yaml \
---upload-to s3a://<your-cluster-name> \
+--upload-to s3a://<bucket-name> \
 --override \
 --upload-to-endpoint "https://cs3.cern.ch"
 ```
 
-NOTE: Command `opsparkctl create spark` will automatically create S3 bucket for the cluster.
-If you wish to use other staging S3 bucket than `s3a://<your-cluster-name>`, you need to use 
-config as specified in `examples/spark-pi-custom-s3.yaml` 
+In order to submit application with local dependencies to S3 so that they are downloaded using `http`, resources neet to be made public
 
-**Creating complex spark applications**
+```
+$ export AWS_ACCESS_KEY_ID=<redacted>
+$ export AWS_SECRET_ACCESS_KEY=<redacted>
+$ ./sparkctl create ./jobs/spark-pi-deps-public.yaml \
+--upload-to s3a://<bucket-name> \
+--override \
+--public \
+--upload-to-endpoint "https://cs3.cern.ch"
+```
+**EOS Authentication example**
 
 Please check [SparkApplication User Guide](https://github.com/cerndb/spark-on-k8s-operator/blob/master/docs/user-guide.md) for details
 on how to create custom SparkApplication YAML files
@@ -183,6 +172,15 @@ $ kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user>
 ```
 Submit your application with custom hadoop config directory to authenticate EOS
 $ HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/secure-eos-events-select.yaml
+```
+
+### Building examples docker image
+
+Being in root folder of this repository, run:
+
+```
+./build-docker.sh
+docker push [registry]:[tag]
 ```
 
 ### Building examples jars
