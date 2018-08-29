@@ -10,43 +10,31 @@ Collection of stable application's examples for spark on kubernetes service
 
 ### Prerequisites
 
-1. **Install Kubernetes cluster with MutatingAdmissionWebhook enabled**
+- Install Kubernetes cluster and deploy Spark K8S Operator, 
+instruction at [https://gitlab.cern.ch/db/spark-service/spark-service-charts](https://gitlab.cern.ch/db/spark-service/spark-service-charts)  
 
-    NOTE: if you already have cluster created, skip
-    
-2. **Fetch cluster configuration to be able to use helm/kubectl/sparkctl**
+- Install `sparkctl` tool to interact with your kubernetes cluster. 
 
-    After successfull configuration, such a files should be found in `~/.kube` folder locally:
     ```
-    config    ca.pem    cert.pem    key.pem
+    MAC:
+    $ wget https://cs3.cern.ch/binaries/sparkctl/mac/latest/sparkctl
+    LINUX:
+    $ wget https://cs3.cern.ch/binaries/sparkctl/linux/latest/sparkctl
+    ```
+    ```
+    $ chmod +x sparkctl
+    $ ./sparkctl --help
     ```
 
-3. **Create Spark on K8S Operator in the cluster**
-    
+- Test that sparkctl can access Spark K8S Operator
+    ```
+    $ ./sparkctl list 
+    ```
 
 ### Submitting Spark applications
 
-Install `sparkctl` tool to interact with your kubernetes cluster. 
-
-```
-MAC:
-$ wget https://cs3.cern.ch/binaries/sparkctl/mac/latest/sparkctl
-LINUX:
-$ wget https://cs3.cern.ch/binaries/sparkctl/linux/latest/sparkctl
-```
-```
-$ chmod +x sparkctl
-$ ./sparkctl --help
-```
 
 **Managing simple application**
-
-Edit yaml file with SparkApplication. 
-
-```
-$ cp ./examples/spark-pi.yaml ./jobs/spark-pi.yaml
-$ vi ./jobs/spark-pi.yaml
-```
 
 The most important sections of your SparkApplication are:
 
