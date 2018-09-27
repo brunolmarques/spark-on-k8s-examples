@@ -1,26 +1,22 @@
-#
-# Copyright 2018 CERN/Switzerland
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 # Example:
-# kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user-name>
-# HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/scalability-test-eos.yaml
+# Set credential for EOS in HADOOP_CONF_DIR
+# $ kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user-name>
+#
+# Set credentials for S3 bucket (S3A) in HADOOP_CONF_DIR
+# $ vi ~/hadoop-conf-dir/core-site.xml
+#
+# Init bucket for job output
+# $ touch data-reduction-eos.init
+# $ s3cmd mb s3://datasets
+# $ s3cmd put data-reduction-eos.init s3://datasets/data-reduction-eos/data-reduction-eos.init
+#
+# Submit job with HADOOP_CONF_DIR (requires webhook)
+# $ HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/scalability-test-eos.yaml
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
 metadata:
-  name: scltest-eos
+  name: data-reduction-eos
   namespace: default
 spec:
   type: Scala
@@ -36,9 +32,9 @@ spec:
      # val configClusterFilePath = SparkFiles.get(configFileName)
     - scalability-test-eos-datasets.csv
      # save to local filesystem (e.g. s3a://)
-    - file:///tmp/reduction-output
+    - s3a://datasets/data-reduction-eos/reduction-output
      # spark measure output (e.g. s3a://)
-    - file:///tmp/sparkmeasure-results
+    - s3a://datasets/data-reduction-eos/sparkmeasure-results
   deps:
     files:
       - local:///opt/spark/examples/scalability-test-eos-datasets.csv
@@ -70,8 +66,8 @@ spec:
     serviceAccount: spark
   executor:
     instances: 1
-    cores: 4
-    memory: "6048m"
+    cores: 1
+    memory: "1024m"
     labels:
       version: 2.4.0
   restartPolicy: Never
