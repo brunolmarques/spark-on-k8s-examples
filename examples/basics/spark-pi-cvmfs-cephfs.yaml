@@ -24,8 +24,6 @@ spec:
     - name: cvmfs-sft
       persistentVolumeClaim:
         claimName: cvmfs-sft-cern-ch
-    - name: spark-work
-      emptyDir: {}
   driver:
     cores: 1
     coreLimit: "1000m"
@@ -34,8 +32,6 @@ spec:
       version: 2.4.0
     serviceAccount: spark
     volumeMounts:
-      - name: spark-work
-        mountPath: /mnt/spark/work
   executor:
     instances: 1
     cores: 1
@@ -49,6 +45,4 @@ spec:
         mountPath: /cvmfs/sft.cern.ch
       - name: cephfs
         mountPath: /cephfs
-      - name: spark-work
-        mountPath: /mnt/spark/work
   restartPolicy: Never
