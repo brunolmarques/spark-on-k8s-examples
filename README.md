@@ -24,9 +24,9 @@ instruction at [http://cern.ch/spark-user-guide](http://spark-user-guide.web.cer
 
     ```
     MAC:
-    $ wget https://cs3.cern.ch/binaries/sparkctl/mac/latest/sparkctl
+    $ wget https://s3.cern.ch/binaries/sparkctl/mac/latest/sparkctl
     LINUX:
-    $ wget https://cs3.cern.ch/binaries/sparkctl/linux/latest/sparkctl
+    $ wget https://s3.cern.ch/binaries/sparkctl/linux/latest/sparkctl
     ```
     ```
     $ chmod +x sparkctl

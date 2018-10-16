@@ -4,7 +4,7 @@
 # Example:
 # export AWS_ACCESS_KEY_ID=<redacted>
 # export AWS_SECRET_ACCESS_KEY=<redacted>
-# ./sparkctl create ./jobs/pyspark-deps.yaml -u s3a://{{ bucket-name }} -e "https://cs3.cern.ch" --public --override
+# ./sparkctl create ./jobs/pyspark-deps.yaml -u s3a://{{ bucket-name }} -e "https://s3.cern.ch" --public --override
 
 apiVersion: "sparkoperator.k8s.io/v1alpha1"
 kind: SparkApplication
