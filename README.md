@@ -1,6 +1,6 @@
 # Spark on Kubernetes examples
 
-Collection of stable application's examples for spark on kubernetes service 
+Collection of stable application's examples for spark on kubernetes service.
 
 ### Table of Contents
 
@@ -8,12 +8,20 @@ Collection of stable application's examples for spark on kubernetes service
 - [Create and manage Spark on Kubernetes cluster](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl)
 - [Submitting Spark applications](#submitting-spark-applications)
     - [Managing simple application](#managing-simple-application)
-    - [Using Webhooks example](#using-webhooks-(customize-driver/executor))
+    - [Customizing driver/executor example](#customizing-driver/executor-example)
     - [Local Dependencies example](#local-dependencies-example)
+    - [Managing application](#managing-application)
     - [Python examples](#python-examples)
     - [Application examples](#application-examples)
 - [Building examples jars](#building-examples-jars)
 - [Building docker image with examples](#building-examples-docker-image)
+
+### Repository Structure
+
+- [Basic functionalities examples (examples->basics)](examples/basics)
+- [Real application examples (examples->applications)](examples/applications)
+- [Real application examples code (src)](src/main)
+- [Real application examples dependencies (libs)](src/main)
 
 ### Prerequisites
 
@@ -73,7 +81,7 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1-examples
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3.1-examples
   imagePullPolicy: Always
   mainClass: ch.cern.sparkrootapplications.examples.SparkPi
   mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
@@ -138,7 +146,7 @@ $ kubectl logs spark-pi-1528991055721-driver
 For more details regarding `sparkctl`, and more detailed user guide, 
 please visit [sparkctl user-guide](https://github.com/cerndb/spark-on-k8s-operator/tree/master/sparkctl)
 
-##### Using webhooks (customize driver/executor)
+##### Customizing driver/executor example
 
 Webhooks are used to customize driver/executor pod for using CephFS, Hadoop config, CVMFS, pod affinity etc.
 
@@ -177,7 +185,7 @@ $ HADOOP_CONF_DIR=~/hadoop-conf-dir sparkctl create spark-pi.yaml
 ```
 
 The above will create `spark-pi` application, and mount to each driver and executor config map 
-with contents of local `HADOOP_CONF_DIR`, and in order to intercept `spark-submit` webhooks are used.
+with contents of local `HADOOP_CONF_DIR`.
 
 ##### Local Dependencies example
 
@@ -185,9 +193,16 @@ Dependencies can be stage building a custom Docker file e.g. [Examples Dockerfil
 or via staging dependencies in high-availability storage as S3 or GCS. 
 
 - [Dockerfile example ](Dockerfile)
-- [Stage to s3 manualy](examples/basics/spark-pi-deps-s3.yaml)
-- [Stage to s3 using sparkctl](examples/basics/spark-pi-deps.yaml)
-- [Stage to http (via s3) using sparkctl](examples/basics/spark-pi-deps-public.yaml)
+- [Stage to s3 manualy](examples/basics/s3cmd-s3-deps-example.yaml)
+- [Stage to s3 using sparkctl](examples/basics/sparkctl-s3-deps-example.yaml)
+- [Stage to http (via s3) using sparkctl](examples/basics/sparkctl-public-deps-example.yaml)
+
+##### Managing application
+
+- [Storage examples (CVMFS/CephFS)](examples/basics/cvmfs-cephfs-example.yaml)
+- [Scheduled application (Cron)](examples/basics/scheduled-app-example.yaml)
+- [Restart Policies](examples/basics/restart-policy-example.yaml)
+- [Private image registry](examples/basics/private-image-example.yaml)
 
 ##### Python examples
 
