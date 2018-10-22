@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE_NAME=gitlab-registry.cern.ch/db/spark-service/docker-registry/spark
+IMAGE_NAME=gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples
 IMAGE_TAG=v2.4.0-hadoop3.1-examples
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
