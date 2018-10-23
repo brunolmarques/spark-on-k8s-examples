@@ -17,13 +17,13 @@ spec:
   volumes:
     - name: cephfs
       persistentVolumeClaim:
-        claimName: manila-cephfs-pvc
+        claimName:cephfs-pvc
     - name: cvmfs-cms
       persistentVolumeClaim:
-        claimName: cvmfs-cms-cern-ch
+        claimName: cvmfs-cms-cern-ch-pvc
     - name: cvmfs-sft
       persistentVolumeClaim:
-        claimName: cvmfs-sft-cern-ch
+        claimName: cvmfs-sft-cern-ch-pvc
   driver:
     cores: 1
     coreLimit: "1000m"
