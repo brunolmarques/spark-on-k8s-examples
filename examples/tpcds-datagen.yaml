@@ -6,7 +6,7 @@
 # Submit job
 # $ sparkctl create ./jobs/tpcds-datagen.yaml
 
-apiVersion: "sparkoperator.k8s.io/v1alpha1"
+apiVersion: "sparkoperator.k8s.io/v1beta1"
 kind: SparkApplication
 metadata:
   name: tpcds-data-gen
@@ -14,7 +14,7 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3.1-examples
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3-0.7
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.DataGenTPCDS
   mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
@@ -67,4 +67,5 @@ spec:
     memory: "2000m"
     labels:
       version: 2.4.0
-  restartPolicy: Never
+  restartPolicy:
+    type: Never

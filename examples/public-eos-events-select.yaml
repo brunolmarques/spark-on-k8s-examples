@@ -1,26 +1,21 @@
 # Example:
-#
-# Authenticate and put credentials in HADOOP_CONF_DIR
-# $ kinit -c ~/hadoop-conf-dir/krb5cc_0 <your-user-name>
-#
-# Submit job
-# $ HADOOP_CONF_DIR=~/hadoop-conf-dir ./sparkctl create ./jobs/secure-eos-events-select.yaml
+# ./sparkctl create ./jobs/public-eos-events-select.yaml
 
-apiVersion: "sparkoperator.k8s.io/v1alpha1"
+apiVersion: "sparkoperator.k8s.io/v1beta1"
 kind: SparkApplication
 metadata:
-  name: secure-eos-events-select
+  name: public-eos-events-select
   namespace: default
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3.1-examples
-  imagePullPolicy: IfNotPresent
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3-0.7
+  imagePullPolicy: Always
   mainClass: ch.cern.sparkrootapplications.examples.EventsSelect
   mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
   mode: cluster
   arguments:
-    - "root://eosuser.cern.ch/eos/user/p/pmrowczy/Shared/evsel.root"
+    - "root://eospublic.cern.ch://eos/opendata/cms/Run2010B/MuOnia/AOD/Apr21ReReco-v1/0000/FEF1B99B-BF77-E011-B0A0-E41F1318174C.root"
   deps:
     jars:
       # WARN - diana-hep/root4j package resets configs spark.hadoop on executors!!
@@ -28,11 +23,6 @@ spec:
       - http://central.maven.org/maven2/org/diana-hep/root4j/0.1.6/root4j-0.1.6.jar
       - http://central.maven.org/maven2/org/apache/bcel/bcel/5.2/bcel-5.2.jar
       - http://central.maven.org/maven2/org/diana-hep/spark-root_2.11/0.1.16/spark-root_2.11-0.1.16.jar
-  sparkConf:
-    # Secure EOS - During submission of job,
-    # ensure to have krb5cc_0 ticket inside your local HADOOP_CONF_DIR
-    "spark.kubernetes.driverEnv.KRB5CCNAME": /etc/hadoop/conf/krb5cc_0
-    "spark.executorEnv.KRB5CCNAME": /etc/hadoop/conf/krb5cc_0
   driver:
     cores: 1
     coreLimit: "1000m"
@@ -41,9 +31,10 @@ spec:
       version: 2.4.0
     serviceAccount: spark
   executor:
-    instances: 1
+    instances: 2
     cores: 1
     memory: "2048m"
     labels:
       version: 2.4.0
-  restartPolicy: Never
+  restartPolicy:
+    type: Never

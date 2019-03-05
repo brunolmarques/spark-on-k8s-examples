@@ -15,10 +15,10 @@ RUN yum group install -y "Development Tools" && \
 ##
 # OUTPUT DOCKER IMAGE
 ##
-FROM gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3.1
+
+FROM gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3-0.7
 MAINTAINER Piotr Mrowczynski <piotr.mrowczynski@cern.ch>
 
-ARG BUILD_DATE
 ARG VCS_REF
 
 ENV SPARK_EXAMPLES_VERSION "2.11-0.3.0"
@@ -33,11 +33,8 @@ COPY ./libs//scala-logging_${SCALA_LOGGING_VERSION}.jar ${SPARK_HOME}/examples/j
 COPY ./libs/spark-measure_${SPARK_MEASURE_VERSION}.jar ${SPARK_HOME}/examples/jars/
 COPY ./libs/spark-sql-perf_${SPARK_SQL_PERF_VERSION}.jar ${SPARK_HOME}/examples/jars/
 
-COPY ./libs/scalability-test-eos-datasets.csv ${SPARK_HOME}/examples/
-
 LABEL \
   org.label-schema.version="0.1" \
-  org.label-schema.build-date=$BUILD_DATE \
   org.label-schema.vcs-url="https://gitlab.cern.ch/db/spark-service/docker-registry.git" \
   org.label-schema.name="Spark Examples Docker - CERN Spark on Kubernetes" \
   org.label-schema.vendor="CERN" \

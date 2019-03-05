@@ -2,240 +2,47 @@
 
 Collection of stable application's examples for spark on kubernetes service.
 
-### Table of Contents
+Full documentation is available in [spark user guide](http://spark-user-guide.web.cern.ch/spark-user-guide/spark-k8s/k8s_overview.html) 
 
-- [Prerequisites](#prerequisites)
-- [Create and manage Spark on Kubernetes cluster](https://github.com/cerndb/spark-on-k8s-operator/tree/master/opsparkctl)
-- [Submitting Spark applications](#submitting-spark-applications)
-    - [Managing simple application](#managing-simple-application)
-    - [Customizing driver/executor example](#customizing-driver/executor-example)
-    - [Local Dependencies example](#local-dependencies-example)
-    - [Managing application](#managing-application)
-    - [Python examples](#python-examples)
-    - [Application examples](#application-examples)
-- [Building examples jars](#building-examples-jars)
-- [Building docker image with examples](#building-examples-docker-image)
+### Application examples
 
-### Repository Structure
+- [Data generation for TPCDS](examples/tpcds-datagen.yaml)
+- [TPCDS SQL Benchmark](examples/tpcds.yaml)
+- [Distributed XRootD Public Events Select](examples/public-eos-events-select.yaml)
 
-- [Basic functionalities examples (examples->basics)](examples/basics)
-- [Real application examples (examples->applications)](examples/applications)
-- [Real application examples code (src)](src/main)
-- [Real application examples dependencies (libs)](src/main)
-
-### Prerequisites
-
-- Install Kubernetes cluster and deploy Spark K8S Operator, 
-instruction at [http://cern.ch/spark-user-guide](http://spark-user-guide.web.cern.ch/spark-user-guide/spark-k8s/k8s_overview.html)  
-
-- Install `sparkctl` tool to interact with your kubernetes cluster. 
-
-    ```
-    MAC:
-    $ wget https://s3.cern.ch/binaries/sparkctl/mac/latest/sparkctl
-    LINUX:
-    $ wget https://s3.cern.ch/binaries/sparkctl/linux/latest/sparkctl
-    ```
-    ```
-    $ chmod +x sparkctl
-    $ ./sparkctl --help
-    ```
-
-- Test that sparkctl can access Spark K8S Operator
-    ```
-    $ export PATH=[path-to-sparkctl-dir]:$PATH
-    $ sparkctl list 
-    ```
-
-### Submitting Spark applications
-
-##### Managing simple application
-
-The most important sections of your SparkApplication are:
-
-- Application name
-    ```
-    metadata:
-      name: spark-pi
-    ```
-- Application file
-    ```
-    spec:
-      mainApplicationFile: "local:///opt/spark/examples/jars/spark-service-examples.jar"
-    ```
-- Application main class
-    ```
-    spec:
-      mainClass: ch.cern.sparkrootapplications.examples.SparkPi
-    ```
-
-To submit application
-
-```
-$ cat <<EOF >>spark-pi.yaml
-apiVersion: "sparkoperator.k8s.io/v1alpha1"
-kind: SparkApplication
-metadata:
-  name: spark-pi
-  namespace: default
-spec:
-  type: Scala
-  mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3.1-examples
-  imagePullPolicy: Always
-  mainClass: ch.cern.sparkrootapplications.examples.SparkPi
-  mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
-  mode: cluster
-  driver:
-    cores: 1
-    coreLimit: "1000m"
-    memory: "1024m"
-    serviceAccount: spark
-  executor:
-    instances: 1
-    cores: 1
-    memory: "1024m"
-  restartPolicy: Never
-EOF
- 
-$ sparkctl create spark-pi.yaml
-```
-
-To delete application
-
-```
-$ sparkctl delete spark-pi
-```
-
-Check if your driver/executors are correctly created
-
-```
-$ sparkctl event spark-pi
-```
-
-To get application logs
-
-```
-$ sparkctl log spark-pi
-```
-
-To check application status
-
-```
-$ sparkctl status spark-pi
-```
-
-To access driver UI (forwarded to localhost:4040 from where sparctl is executed)
-
-```
-$ sparkctl forward spark-pi
-```
-
-Alternatively, to check application status (or check created pods and their status)
-
-```
-$ kubectl describe sparkapplication spark-pi
-or
-$ kubectl get pods -n default
-or
-$ kubectl describe pod spark-pi-1528991055721-driver
-or
-$ kubectl logs spark-pi-1528991055721-driver
-```
-
-For more details regarding `sparkctl`, and more detailed user guide, 
-please visit [sparkctl user-guide](https://github.com/cerndb/spark-on-k8s-operator/tree/master/sparkctl)
-
-##### Customizing driver/executor example
-
-Webhooks are used to customize driver/executor pod for using CephFS, Hadoop config, CVMFS, pod affinity etc.
-
-Example of customizing driver/executors with custom hadoop config is shown below. 
-
-```
-$ mkdir ~/hadoop-conf-dir/
-$ cat <<EOF >>~/hadoop-conf-dir/core-site.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
-
-<configuration>
-    <property>
-        <name>fs.s3a.endpoint</name>
-        <value>{{ endpoint }}</value>
-    </property>
-
-    <property>
-        <name>fs.s3a.bucket.{{ bucket }}.access.key</name>
-        <value>{{ access }}</value>
-    </property>
-
-    <property>
-        <name>fs.s3a.bucket.{{ bucket }}.secret.key</name>
-        <value>{{ secret }}</value>
-    </property>
-
-    <property>
-        <name>fs.s3a.impl</name>
-        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
-    </property>
-</configuration>
-EOF
- 
-$ HADOOP_CONF_DIR=~/hadoop-conf-dir sparkctl create spark-pi.yaml
-```
-
-The above will create `spark-pi` application, and mount to each driver and executor config map 
-with contents of local `HADOOP_CONF_DIR`.
-
-##### Local Dependencies example
-
-Dependencies can be stage building a custom Docker file e.g. [Examples Dockerfile](Dockerfile),
-or via staging dependencies in high-availability storage as S3 or GCS. 
-
-- [Dockerfile example ](Dockerfile)
-- [Stage to s3 manualy](examples/basics/s3cmd-s3-deps-example.yaml)
-- [Stage to s3 using sparkctl](examples/basics/sparkctl-s3-deps-example.yaml)
-- [Stage to http (via s3) using sparkctl](examples/basics/sparkctl-public-deps-example.yaml)
-
-##### Managing application
-
-- [Storage examples (CVMFS/CephFS)](examples/basics/cvmfs-cephfs-example.yaml)
-- [Scheduled application (Cron)](examples/basics/scheduled-app-example.yaml)
-- [Restart Policies](examples/basics/restart-policy-example.yaml)
-- [Private image registry](examples/basics/private-image-example.yaml)
-
-##### Python examples
-
-- [Spark PyFiles](examples/basics/spark-pyfiles.yaml)
-- [Spark Python Zip Dependencies](examples/applications/py-wordcount.yaml)
-
-##### Application examples
-
-- [Data generation for TPCDS](examples/applications/tpcds-datagen.yaml)
-- [TPCDS SQL Benchmark](examples/applications/tpcds.yaml)
-- [EOS Public Events Select](examples/applications/public-eos-events-select.yaml)
-- [EOS Authentication Events Select (requires webhooks enabled)](examples/applications/secure-eos-events-select.yaml)
-- [Data Reduction EOS (requires webhooks enabled)](examples/applications/data-reduction-eos.yaml)
-
-### Building examples docker image
+##### 1. Building examples jars
 
 Being in root folder of this repository, run:
 
 ```
-./build-docker.sh
-docker push [registry]:[tag]
+$ sbt package
 ```
 
-### Building examples jars
-
-Being in root folder of this repository, run:
-
-```
-sbt package
-```
-
-Find your jar in 
+Find your jar and move to `/libs` folder
 
 ```
 <path-to-examples/spark-service-examples/target/scala-X.Y/spark-service-examples_-X.Y-Z.jar
 ```
+
+##### 2. Building examples docker image
+
+Being in root folder of this repository, run:
+
+```
+$ OUTPUT_IMAGE=gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3-0.7
+$ docker build --no-cache -t ${OUTPUT_IMAGE} .
+$ docker push ${OUTPUT_IMAGE}
+```
+
+##### 3. Test on Kubernetes cluster
+
+###### Events Selection
+
+```
+$ ./sparkctl create ./examples/public-eos-events-select.yaml
+$ ./sparkctl log -f public-eos-events-select
+```
+
+###### TPCDS Spark SQL
+
+TPCDS is an example of complex application that will run Query 23a and save output to known location. First, dataset needs to be created [as described here](examples/tpcds-datagen.yaml). Fill `access` and `secret` below to be able to read/write to S3. When the creation of the test dataset is finished, continue with an actual [TPCDS Spark SQL job](examples/tpcds.yaml). 
