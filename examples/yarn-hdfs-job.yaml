@@ -1,0 +1,52 @@
+# Format for cronjob:
+#
+# apiVersion: batch/v1beta1
+# kind: CronJob
+# metadata:
+#   name: hdfs-etl
+# spec:
+#   schedule: "* * * * *" # every minute
+#   concurrencyPolicy: Forbid
+#   jobTemplate:
+#     spec:
+#       template:
+#         spec:
+#         ....
+#
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hdfs-etl
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        app: hdfs-etl
+    spec:
+      containers:
+      - name: hdfs-etl
+        imagePullPolicy: Always
+        image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0
+        command: ["/bin/sh"]
+        args:
+        - -c
+        - source hadoop-setconf.sh analytix; spark-submit --conf spark.driver.host=$POD_HOSTNAME --class ch.cern.monitoring.HdfsETL $SPARK_HOME/examples/jars/spark-k8s-examples-assembly-1.0.jar;
+        env:
+        - name: KRB5CCNAME
+          value: "/etc/krb5/krb5cc"
+        - name: POD_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        volumeMounts:
+        - name: krb5
+          readOnly: true
+          mountPath: "/etc/krb5"
+      restartPolicy: OnFailure
+      hostNetwork: true
+      volumes:
+      - name: krb5
+        secret:
+          secretName: krb5
