@@ -27,26 +27,32 @@ spec:
     spec:
       containers:
       - name: hdfs-etl
-        imagePullPolicy: Always
-        image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0
+          # take image with spark configuration release from 26.04.2019
+        image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0-020519
+          # source configuration and submit job
         command: ["/bin/sh"]
         args:
         - -c
         - source hadoop-setconf.sh analytix; spark-submit --conf spark.driver.host=$POD_HOSTNAME --class ch.cern.monitoring.HdfsETL $SPARK_HOME/examples/jars/spark-k8s-examples-assembly-1.0.jar;
         env:
+          # authenticate yarn/hdfs access
         - name: KRB5CCNAME
           value: "/etc/krb5/krb5cc"
+          # define driver hostname
         - name: POD_HOSTNAME
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
         volumeMounts:
+          # authenticate yarn/hdfs access
         - name: krb5
           readOnly: true
           mountPath: "/etc/krb5"
       restartPolicy: OnFailure
-      hostNetwork: true
       volumes:
+        # authenticate yarn/hdfs access
       - name: krb5
         secret:
           secretName: krb5
+        # required for access to the driver host ports from yarn cluster
+      hostNetwork: true

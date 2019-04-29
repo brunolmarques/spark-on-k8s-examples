@@ -15,9 +15,17 @@ RUN yum group install -y "Development Tools" && \
 ##
 # OUTPUT DOCKER IMAGE
 ##
-
-FROM gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.1-hadoop2-0.7-250419
+FROM gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.1-hadoop2-0.8
 MAINTAINER Piotr Mrowczynski <piotr.mrowczynski@cern.ch>
+
+RUN yum install -y \
+     # Install configs to be able to connect to cern hadoop clusters
+    "cern-hadoop-config" \
+     # Required for cvmfs
+    HEP_OSlibs \
+     # Install xrootd-client
+    xrootd-client \
+    xrootd-client-libs
 
 COPY --from=examples-builder /tmp/tpcds-kit/tools /opt/tpcds-kit/tools
 COPY ./libs/*jar ${SPARK_HOME}/examples/jars/

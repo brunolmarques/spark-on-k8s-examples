@@ -10,10 +10,11 @@ unmanagedBase <<= baseDirectory { base => base / "libs" }
 
 sparkVersion := "2.4.1"
 
-sparkComponents := Seq("sql", "streaming", "streaming-kafka-0-10")
+sparkComponents := Seq("sql", "streaming")
 
 // Dependencies required for this project
 libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-streaming-kafka-0-10" % "2.4.1",
   // Diana HEP dependencies
   "org.diana-hep" % "spark-root_2.11" % "0.1.16",
   "org.diana-hep" % "histogrammar-sparksql_2.11" % "1.0.3",

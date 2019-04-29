@@ -1,7 +1,6 @@
 # Prepare bucket
 # $ touch tpcds.init
-# $ s3cmd put tpcds.init s3://datasets/tpcds-1g/tpcds.init
-# $ s3cmd put tpcds.init s3://datasets/tpcds-100g/tpcds.init
+# $ s3cmd put tpcds.init s3://{{ custom-bucket }}/TPCDS-TEST/tpcds.init
 #
 # Submit job
 # $ sparkctl create ./jobs/tpcds-datagen.yaml
@@ -14,10 +13,11 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3-0.7
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0-020519
+  sparkVersion: 2.4.1
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.DataGenTPCDS
-  mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
+  mainApplicationFile: local:///usr/hdp/spark/examples/jars/spark-k8s-examples-assembly-1.0.jar
   mode: cluster
   arguments:
   # working directory to write data
