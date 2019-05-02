@@ -7,8 +7,8 @@ spec:
   type: Scala
   mode: cluster
   image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0-020519
+  # if to pull new image if time: imagePullPolicy: Always
   sparkVersion: 2.4.1
-  imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.BenchmarkSparkSQL
   mainApplicationFile: local:///opt/spark/examples/jars/spark-k8s-examples-assembly-1.0.jar
   mode: cluster
