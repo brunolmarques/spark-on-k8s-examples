@@ -6,41 +6,65 @@ Full documentation is available in [spark user guide](http://spark-user-guide.we
 
 ### Application examples
 
-- [Data generation for TPCDS](examples/tpcds-datagen.yaml)
-- [TPCDS SQL Benchmark](examples/tpcds.yaml)
-- [Distributed XRootD Public Events Select](examples/public-eos-events-select.yaml)
+- [Spark Streaming with kafka](examples/kafka-streaming.yaml)
+- [HDFS/YARN ETL](examples/yarn-hdfs-job.yaml)
+- [Data generation for TPCDS with S3](examples/s3-tpcds-datagen.yaml)
+- [TPCDS SQL Benchmark with S3](examples/s3-tpcds.yaml)
+- [Distributed Events Select with ROOT/EOS](examples/public-eos-events-select.yaml)
 
-##### 1. Building examples jars
+##### 1. Build docker image or use existing one
 
-Being in root folder of this repository, run:
+`gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0`
 
-```
-$ sbt package
-```
-
-Find your jar and move to `/libs` folder
-
-```
-<path-to-examples/spark-service-examples/target/scala-X.Y/spark-service-examples_-X.Y-Z.jar
-```
-
-##### 2. Building examples docker image
+###### 1a. Building examples jars
 
 Being in root folder of this repository, run:
 
 ```
-$ OUTPUT_IMAGE=gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3-0.7
-$ docker build --no-cache -t ${OUTPUT_IMAGE} .
+$ sbt assembly
+```
+
+###### 1b. Building examples docker image (with assemled jar in target/ and deps jars in libs/)
+
+Being in root folder of this repository, run:
+
+```
+$ IMAGE_VERSION=v1.0-$(date +'%d%m%y')
+$ docker build -t gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:$IMAGE_VERSION .
 $ docker push ${OUTPUT_IMAGE}
 ```
 
-##### 3. Test on Kubernetes cluster
+##### 2. Test on Kubernetes cluster
+
+###### Sparl Streaming with Kafka
+
+```bash
+$ kubectl delete sparkapplication kafka
+$ kubectl create -f ./examples/kafka-streaming.yaml
+$ kubectl logs kafka-driver
+```
+
+###### HDFS ETL JOB/CRONJOB
+
+Authenticate with e.g. krbcache or keytab
+
+```bash
+$ kubectl delete secret krb5
+$ kubectl create secret generic krb5 --from-file=krb5cc=/tmp/krb5cc_X
+```
+
+Submit job
+
+```bash
+$ kubectl delete job hdfs-etl
+$ kubectl create -f ./examples/yarn-hdfs-job.yaml
+$ kubectl logs -l "app=hdfs-etl"
+```
 
 ###### Events Selection
 
 ```
-$ ./sparkctl create ./examples/public-eos-events-select.yaml
-$ ./sparkctl log -f public-eos-events-select
+$ kubectl apply -f ./examples/eos-events-select.yaml
 ```
 
 ###### TPCDS Spark SQL

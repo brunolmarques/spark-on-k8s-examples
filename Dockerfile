@@ -15,23 +15,21 @@ RUN yum group install -y "Development Tools" && \
 ##
 # OUTPUT DOCKER IMAGE
 ##
-
-FROM gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.0-hadoop3-0.7
+FROM gitlab-registry.cern.ch/db/spark-service/docker-registry/spark:v2.4.1-hadoop2-0.8
 MAINTAINER Piotr Mrowczynski <piotr.mrowczynski@cern.ch>
 
-ARG VCS_REF
-
-ENV SPARK_EXAMPLES_VERSION "2.11-0.3.0"
-ENV SCALA_LOGGING_VERSION "2.11-3.9.0"
-ENV SPARK_MEASURE_VERSION "2.11-0.11"
-ENV SPARK_SQL_PERF_VERSION "2.11-0.5.0-SNAPSHOT"
+RUN yum install -y \
+     # Install configs to be able to connect to cern hadoop clusters
+    "cern-hadoop-config" \
+     # Required for cvmfs
+    HEP_OSlibs \
+     # Install xrootd-client
+    xrootd-client \
+    xrootd-client-libs
 
 COPY --from=examples-builder /tmp/tpcds-kit/tools /opt/tpcds-kit/tools
-
-COPY ./libs/spark-service-examples_${SPARK_EXAMPLES_VERSION}.jar ${SPARK_HOME}/examples/jars/
-COPY ./libs//scala-logging_${SCALA_LOGGING_VERSION}.jar ${SPARK_HOME}/examples/jars/
-COPY ./libs/spark-measure_${SPARK_MEASURE_VERSION}.jar ${SPARK_HOME}/examples/jars/
-COPY ./libs/spark-sql-perf_${SPARK_SQL_PERF_VERSION}.jar ${SPARK_HOME}/examples/jars/
+COPY ./libs/*jar ${SPARK_HOME}/examples/jars/
+COPY ./target/scala-2.11/*jar ${SPARK_HOME}/examples/jars/
 
 LABEL \
   org.label-schema.version="0.1" \

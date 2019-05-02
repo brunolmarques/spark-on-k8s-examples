@@ -1,36 +1,3 @@
-# Example:
-#
-# Create S3A configuration
-# $ cat <<EOF >>~/hadoop-conf-dir/core-site.xml
-#<?xml version="1.0" encoding="UTF-8"?>
-#<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
-#
-#<configuration>
-#    <property>
-#        <name>fs.s3a.endpoint</name>
-#        <value>{{ endpoint }}</value>
-#    </property>
-#
-#    <property>
-#        <name>fs.s3a.access.key</name>
-#        <value>{{ access }}</value>
-#    </property>
-#
-#    <property>
-#        <name>fs.s3a.secret.key</name>
-#        <value>{{ secret }}</value>
-#    </property>
-#
-#    <property>
-#        <name>fs.s3a.impl</name>
-#        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
-#    </property>
-#</configuration>
-#EOF
-#
-# Submit job with HADOOP_CONF_DIR
-# $ HADOOP_CONF_DIR=~/hadoop-conf-dir sparkctl create ./jobs/tpcds.yaml
-
 apiVersion: "sparkoperator.k8s.io/v1beta1"
 kind: SparkApplication
 metadata:
@@ -39,10 +6,11 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v2.4.0-hadoop3-0.7
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0-020519
+  sparkVersion: 2.4.1
   imagePullPolicy: IfNotPresent
   mainClass: ch.cern.tpcds.BenchmarkSparkSQL
-  mainApplicationFile: local:///opt/spark/examples/jars/spark-service-examples_2.11-0.3.0.jar
+  mainApplicationFile: local:///opt/spark/examples/jars/spark-k8s-examples-assembly-1.0.jar
   mode: cluster
   arguments:
   # working directory where data table reside (must exists and have tables directly)
@@ -63,9 +31,13 @@ spec:
     - "true"
   deps:
     jars:
-      - local:///opt/spark/examples/jars/scala-logging_2.11-3.9.0.jar
-      - local:///opt/spark/examples/jars/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
-      - local:///opt/spark/examples/jars/spark-measure_2.11-0.11.jar
+      - local:///usr/hdp/spark/examples/jars/scala-logging_2.11-3.9.0.jar
+      - local:///usr/hdp/spark/examples/jars/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+      - local:///usr/hdp/spark/examples/jars/spark-measure_2.11-0.11.jar
+  hadoopConf:
+    "fs.s3a.endpoint": {{ endpoint }}
+    "fs.s3a.bucket.{{ custom-bucket }}.access.key": {{ access }}
+    "fs.s3a.bucket.{{ custom-bucket }}.secret.key": {{ secret }}
   sparkConf:
     # Cloud specific - need to run with speculation to avoid strugglers
     "spark.speculation": "true"

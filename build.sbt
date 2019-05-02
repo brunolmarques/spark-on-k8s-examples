@@ -1,41 +1,45 @@
-name := "spark-service-examples"
+name := "spark-k8s-examples"
 
-organization := "ch.cern"
-
-licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
-
-version := "0.3.0"
-
-isSnapshot := true
+version := "1.0"
 
 scalaVersion := "2.11.8"
 
-spIgnoreProvided := true
-
-sparkVersion := "2.3.0"
-
-sparkComponents := Seq("sql", "hive", "mllib")
-
-resolvers += Resolver.mavenLocal
+javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 unmanagedBase <<= baseDirectory { base => base / "libs" }
 
-//libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.9.0"
+sparkVersion := "2.4.1"
 
-libraryDependencies += "ch.cern.sparkmeasure" %% "spark-measure" % "0.11"
+sparkComponents := Seq("sql", "streaming")
 
-libraryDependencies += "org.diana-hep" % "spark-root_2.11" % "0.1.16"
+// Dependencies required for this project
+libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-streaming-kafka-0-10" % "2.4.1",
+  // Diana HEP dependencies
+  "org.diana-hep" % "spark-root_2.11" % "0.1.16",
+  "org.diana-hep" % "histogrammar-sparksql_2.11" % "1.0.3",
+  // JSON serialization
+  "org.json4s" %% "json4s-native" % "3.2.10"
+)
 
-libraryDependencies += "org.diana-hep" % "histogrammar-sparksql_2.11" % "1.0.3"
+// Remove stub classes
+assemblyMergeStrategy in assembly := {
+  case PathList("org", "apache", "spark", "unused", "UnusedStubClass.class") => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
 
-libraryDependencies += "org.json4s" % "json4s-native_2.11" % "3.2.11"
+// Exclude the Scala runtime jars
+assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
 
-libraryDependencies += "org.scalanlp" %% "breeze" % "0.12"
+resolvers ++= Seq(
+  "Spray Repository" at "http://repo.spray.cc/",
+  "Cloudera Repository" at "https://repository.cloudera.com/artifactory/cloudera-repos/",
+  "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
+  "Second Typesafe repo" at "http://repo.typesafe.com/typesafe/maven-releases/",
+  "Mesosphere Public Repository" at "http://downloads.mesosphere.io/maven",
+  Resolver.sonatypeRepo("public")
+)
 
-libraryDependencies += "org.scalanlp" %% "breeze-natives" % "0.12"
-
-libraryDependencies += "org.scalanlp" %% "breeze-viz" % "0.12"
-
-libraryDependencies += "org.sameersingh.scalaplot" % "scalaplot" % "0.0.4"
-
-//libraryDependencies += "org.diana-hep" % "histogrammar-bokeh_2.11" % "1.0.3"
+resolvers += Resolver.url("bintray-sbt-plugins", url("http://dl.bintray.com/sbt/sbt-plugin-releases"))(Resolver.ivyStylePatterns)
