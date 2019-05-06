@@ -29,12 +29,12 @@ spec:
       - name: hdfs-etl
           # take image with spark configuration release from 26.04.2019
           # if to pull new image each time: imagePullPolicy: Always
-        image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0-020519
+        image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-060519
           # source configuration and submit job
         command: ["/bin/sh"]
         args:
         - -c
-        - source hadoop-setconf.sh analytix; spark-submit --conf spark.driver.host=$POD_HOSTNAME --class ch.cern.monitoring.HdfsETL $SPARK_HOME/examples/jars/spark-k8s-examples-assembly-1.0.jar;
+        - source hadoop-setconf.sh analytix; spark-submit --conf spark.driver.host=$POD_HOSTNAME --class ch.cern.monitoring.HdfsETL $SPARK_HOME/examples/jars/spark-k8s-examples-assembly-1.1.jar;
         env:
           # authenticate yarn/hdfs access
         - name: KRB5CCNAME

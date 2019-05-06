@@ -7,11 +7,11 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0-020519
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-060519
   # if to pull new image if time: imagePullPolicy: Always
   sparkVersion: 2.4.1
   mainClass: ch.cern.monitoring.KafkaRead
-  mainApplicationFile: local:///usr/hdp/spark/examples/jars/spark-k8s-examples-assembly-1.0.jar
+  mainApplicationFile: local:///usr/hdp/spark/examples/jars/spark-k8s-examples-assembly-1.1.jar
   mode: cluster
   arguments:
     - "fts_raw_complete"

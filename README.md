@@ -9,6 +9,8 @@ Collection of stable application's examples for spark on kubernetes service.
 - [Data generation for TPCDS with S3](examples/s3-tpcds-datagen.yaml)
 - [TPCDS SQL Benchmark with S3](examples/s3-tpcds.yaml)
 - [Distributed Events Select with ROOT/EOS](examples/public-eos-events-select.yaml)
+- [Spark Streaming Data generator](examples/stream-generator.yaml)
+- [Spark Structured Streaming Querying](examples/stream-query.yaml)
 
 ### Prerequisites
 
@@ -35,9 +37,9 @@ $ sbt assembly
 Being in root folder of this repository, run:
 
 ```
-$ IMAGE_VERSION=v1.0-$(date +'%d%m%y')
+$ IMAGE_VERSION=v1.1-$(date +'%d%m%y')
 $ docker build -t gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:$IMAGE_VERSION .
-$ docker push ${OUTPUT_IMAGE}
+$ docker push gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:$IMAGE_VERSION
 ```
 
 #### 2. Test on Kubernetes cluster
@@ -62,15 +64,35 @@ Authenticate with e.g. krbcache or keytab
 
 ```bash
 $ kubectl delete secret krb5
-$ kubectl create secret generic krb5 --from-file=krb5cc=/tmp/krb5cc_X
+$ kubectl create secret generic krb5 --from-file=krb5cc="$(klist|grep FILE|cut -f3 -d":")"
 ```
 
 Submit job
 
 ```bash
-$ kubectl delete job hdfs-etl
 $ kubectl create -f ./examples/yarn-hdfs-job.yaml
 $ kubectl logs -l "app=hdfs-etl"
+```
+
+##### Structured Streaming 
+
+Authenticate with e.g. krbcache
+
+```bash
+$ kubectl delete secret krb5
+$ kubectl create secret generic krb5 --from-file=krb5cc="$(klist|grep FILE|cut -f3 -d":")"
+```
+
+Submit generator
+
+```bash
+$ kubectl create -f ./examples/stream-generator.yaml
+```
+
+Submit reader
+
+```bash
+$ kubectl create -f ./examples/stream-queries.yaml
 ```
 
 ##### Events Selection

@@ -1,0 +1,62 @@
+#spark-submit \
+#--master local[*] \
+#--conf "spark.driver.extraJavaOptions=-Djava.security.auth.login.config=./jaas.conf" \
+#--conf "spark.executor.extraJavaOptions=-Djava.security.auth.login.config=./jaas.conf" \
+#--class ch.cern.db.StreamQuery /build/target/scala-2.11/spark-k8s-examples-assembly-1.1.jar \
+#"spark-streaming" "dbnile-kafka-a-5:9093,dbnile-kafka-b-5:9093,dbnile-kafka-c-5:9093" "./kafka.jks" "password"
+#
+
+apiVersion: "sparkoperator.k8s.io/v1beta1"
+kind: SparkApplication
+metadata:
+  name: stream-query
+  namespace: default
+spec:
+  type: Scala
+  mode: cluster
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-060519
+  # if to pull new image if time: imagePullPolicy: Always
+  sparkVersion: 2.4.1
+  mainClass: ch.cern.db.StreamQuery
+  mainApplicationFile: local:///usr/hdp/spark/examples/jars/spark-k8s-examples-assembly-1.1.jar
+  mode: cluster
+  sparkConf:
+    # krb auth
+    "spark.driver.extraJavaOptions": "-Djava.security.auth.login.config=./jaas.conf"
+    "spark.executor.extraJavaOptions": "-Djava.security.auth.login.config=./jaas.conf"
+  arguments:
+    - "spark-streaming" # topic
+    - "dbnile-kafka-a-5:9093,dbnile-kafka-b-5:9093,dbnile-kafka-c-5:9093" # brokers
+    - "./kafka.jks" # tls
+    - "password" # tls
+  driver:
+    cores: 1
+    coreLimit: "1000m"
+    memory: "1024m"
+    labels:
+      version: 2.4.0
+    serviceAccount: spark
+    volumeMounts:
+    - name: krb5
+      readOnly: true
+      mountPath: "/etc/krb5"
+    envVars:
+      KRB5CCNAME: "/etc/krb5/krb5cc"
+  executor:
+    instances: 1
+    cores: 1
+    memory: "2000m"
+    labels:
+      version: 2.4.0
+    volumeMounts:
+    - name: krb5
+      readOnly: true
+      mountPath: "/etc/krb5"
+    envVars:
+      KRB5CCNAME: "/etc/krb5/krb5cc"
+  restartPolicy:
+    type: Always
+  volumes:
+  - name: krb5
+    secret:
+      secretName: krb5
