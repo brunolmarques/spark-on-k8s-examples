@@ -27,8 +27,19 @@ RUN yum install -y \
     xrootd-client \
     xrootd-client-libs
 
+RUN curl https://cafiles.cern.ch/cafiles/certificates/CERN%20Root%20Certification%20Authority%202.crt -o CERNRootCertificationAuthority2.crt && \
+    curl https://cafiles.cern.ch/cafiles/certificates/CERN%20Grid%20Certification%20Authority.crt -o CERNGridCertificationAuthority.crt && \
+    keytool -importcert -file CERNRootCertificationAuthority2.crt -keystore kafka.jks -alias "cernroot" -storepass password -noprompt && \
+    keytool -importcert -file CERNGridCertificationAuthority.crt -keystore kafka.jks -alias "cerngrid" -storepass password -noprompt
+
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl && \
+    chmod +x ./kubectl && \
+    mv ./kubectl /usr/local/bin/kubectl
+
 COPY --from=examples-builder /tmp/tpcds-kit/tools /opt/tpcds-kit/tools
-COPY ./libs/*jar ${SPARK_HOME}/examples/jars/
+COPY ./data/* ./
+COPY ./libs/* ./
+
 COPY ./target/scala-2.11/*jar ${SPARK_HOME}/examples/jars/
 
 LABEL \

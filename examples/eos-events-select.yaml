@@ -6,21 +6,20 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0-020519
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-070519
   sparkVersion: 2.4.1
-  # if to pull new image if time: imagePullPolicy: Always
   mainClass: ch.cern.sparkrootapplications.EventsSelect
-  mainApplicationFile: local:///usr/hdp/spark/examples/jars/spark-k8s-examples-assembly-1.0.jar
+  mainApplicationFile: local:///usr/hdp/spark/examples/jars/spark-k8s-examples-assembly-1.1.jar
   mode: cluster
   arguments:
     - "root://eospublic.cern.ch://eos/opendata/cms/Run2010B/MuOnia/AOD/Apr21ReReco-v1/0000/FEF1B99B-BF77-E011-B0A0-E41F1318174C.root"
   sparkConf:
-    "spark.driver.extraClassPath": /usr/hdp/spark/examples/jars/hadoop-xrootd-1.0.0.jar
+    "spark.driver.extraClassPath": /usr/hdp/spark/work-dir/hadoop-xrootd-1.0.0.jar
   deps:
     jars:
       # WARN - diana-hep/root4j package resets configs spark.hadoop on executors!!
       # WARN - must be specified in HADOOP_CONF_DIR in core-site.xml - ref https://github.com/diana-hep/root4j/issues/3
-      - local:///usr/hdp/spark/examples/jars/hadoop-xrootd-1.0.0.jar
+      - local:///usr/hdp/spark/work-dir/hadoop-xrootd-1.0.0.jar
       - http://central.maven.org/maven2/org/diana-hep/root4j/0.1.6/root4j-0.1.6.jar
       - http://central.maven.org/maven2/org/apache/bcel/bcel/5.2/bcel-5.2.jar
       - http://central.maven.org/maven2/org/diana-hep/spark-root_2.11/0.1.16/spark-root_2.11-0.1.16.jar

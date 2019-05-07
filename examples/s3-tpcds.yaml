@@ -6,11 +6,10 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0-020519
-  # if to pull new image if time: imagePullPolicy: Always
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-070519
   sparkVersion: 2.4.1
   mainClass: ch.cern.tpcds.BenchmarkSparkSQL
-  mainApplicationFile: local:///opt/spark/examples/jars/spark-k8s-examples-assembly-1.0.jar
+  mainApplicationFile: local:///usr/hdp/spark/examples/jars/spark-k8s-examples-assembly-1.1.jar
   mode: cluster
   arguments:
   # working directory where data table reside (must exists and have tables directly)
@@ -31,9 +30,9 @@ spec:
     - "true"
   deps:
     jars:
-      - local:///usr/hdp/spark/examples/jars/scala-logging_2.11-3.9.0.jar
-      - local:///usr/hdp/spark/examples/jars/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
-      - local:///usr/hdp/spark/examples/jars/spark-measure_2.11-0.11.jar
+      - local:///usr/hdp/spark/work-dir/scala-logging_2.11-3.9.0.jar
+      - local:///usr/hdp/spark/work-dir/spark-sql-perf_2.11-0.5.0-SNAPSHOT.jar
+      - local:///usr/hdp/spark/work-dir/spark-measure_2.11-0.11.jar
   hadoopConf:
     "fs.s3a.endpoint": {{ endpoint }}
     "fs.s3a.bucket.{{ custom-bucket }}.access.key": {{ access }}

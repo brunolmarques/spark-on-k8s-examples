@@ -1,6 +1,6 @@
 name := "spark-k8s-examples"
 
-version := "1.0"
+version := "1.1"
 
 scalaVersion := "2.11.8"
 
@@ -8,13 +8,13 @@ javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 unmanagedBase <<= baseDirectory { base => base / "libs" }
 
-sparkVersion := "2.4.1"
-
-sparkComponents := Seq("sql", "streaming")
-
 // Dependencies required for this project
 libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-core" % "2.4.1" % "provided",
+  "org.apache.spark" %% "spark-sql" % "2.4.1" % "provided",
+  "org.apache.spark" %% "spark-streaming" % "2.4.1" % "provided",
   "org.apache.spark" %% "spark-streaming-kafka-0-10" % "2.4.1",
+  "org.apache.spark" %% "spark-sql-kafka-0-10" % "2.4.1",
   // Diana HEP dependencies
   "org.diana-hep" % "spark-root_2.11" % "0.1.16",
   "org.diana-hep" % "histogrammar-sparksql_2.11" % "1.0.3",

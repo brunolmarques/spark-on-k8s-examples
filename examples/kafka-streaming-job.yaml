@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka
+  namespace: default
+spec:
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      serviceAccountName: spark
+      containers:
+      - name: kafka
+          # if to pull new image each time: imagePullPolicy: Always
+        image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-070519
+          # source configuration and submit job
+        command: ["/bin/sh"]
+        args:
+        - -c
+        # source hadoop-setconf.sh k8s-spark-gp
+        - (kubectl proxy --port 8080 &); spark-submit --deploy-mode client --master k8s://http://127.0.0.1:8080 --conf spark.kubernetes.container.image=gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-070519 --conf spark.kubernetes.namespace=default --conf spark.kubernetes.driver.pod.name=$POD_NAME --conf spark.driver.host=$POD_IP --class ch.cern.monitoring.KafkaRead $SPARK_HOME/examples/jars/spark-k8s-examples-assembly-1.1.jar "fts_raw_complete" "monit-kafkax-dev-b3b87d619c.cern.ch:9092";
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        ports:
+        - containerPort: 4040
+      restartPolicy: OnFailure
+      hostNetwork: true
