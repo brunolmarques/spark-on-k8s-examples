@@ -4,8 +4,8 @@ Collection of stable application's examples for spark on kubernetes service.
 
 ### Application examples
 
-- [Spark Streaming with kafka](examples/kafka-streaming.yaml)
-- [HDFS/YARN ETL](examples/yarn-hdfs-job.yaml)
+- [Spark Streaming Job](examples/kafka-streaming.yaml)
+- [HDFS/YARN ETL Job](examples/yarn-hdfs-job.yaml)
 - [Data generation for TPCDS with S3](examples/s3-tpcds-datagen.yaml)
 - [TPCDS SQL Benchmark with S3](examples/s3-tpcds.yaml)
 - [Distributed Events Select with ROOT/EOS](examples/public-eos-events-select.yaml)
@@ -22,7 +22,7 @@ Collection of stable application's examples for spark on kubernetes service.
 
 #### 1. Build docker image or use existing one
 
-`gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.0`
+`gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-070519`
 
 ##### 1a. Building examples jars
 
@@ -48,14 +48,21 @@ $ docker push gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:$IMAGE
 
 Full documentation on how to customize and work with Kubernetes Operator is available in [Spark Kubernetes Guide](http://spark-user-guide.web.cern.ch)
 
-##### Spark Streaming with Kafka
+##### Spark Streaming JOB/CRONJOB
+
+Submit job
 
 ```bash
-$ kubectl delete sparkapplication kafka
-$ kubectl create -f ./examples/kafka-streaming.yaml
-$ kubectl get pods -n default
-$ kubectl logs kafka-driver
-$ kubectl logs -l "sparkoperator.k8s.io/app-name=kafka"
+$ kubectl delete job kafka
+$ kubectl create -f ./examples/kafka-streaming-job.yaml
+$ kubectl logs -l "app=kafka"
+```
+
+Find driver ui
+
+```bash
+$ kubectl get pod -l "app=kafka" -o yaml | grep host
+http://<hostIP>:4040
 ```
 
 ##### HDFS ETL JOB/CRONJOB
@@ -70,11 +77,11 @@ $ kubectl create secret generic krb5 --from-file=krb5cc="$(klist|grep FILE|cut -
 Submit job
 
 ```bash
+$ kubectl delete job hdfs-etl
 $ kubectl create -f ./examples/yarn-hdfs-job.yaml
-$ kubectl logs -l "app=hdfs-etl"
 ```
 
-##### Structured Streaming 
+##### Structured Streaming with Operator
 
 Authenticate with e.g. krbcache
 
@@ -95,13 +102,18 @@ Submit reader
 $ kubectl create -f ./examples/stream-queries.yaml
 ```
 
-##### Events Selection
+Check pod logs
+
+```bash
+$ kubectl logs -f stream-queries-driver
+```
+
+##### Events Selection with Operator
 
 ```
 $ kubectl apply -f ./examples/eos-events-select.yaml
-$ kubectl logs -l "sparkoperator.k8s.io/app-name=eos-events-select"
 ```
 
-##### TPCDS Spark SQL
+##### TPCDS Spark SQL with Operator
 
 TPCDS is an example of complex application that will run Query 23a and save output to known location. First, dataset needs to be created [as described here](examples/tpcds-datagen.yaml). Fill `access` and `secret` below to be able to read/write to S3. When the creation of the test dataset is finished, continue with an actual [TPCDS Spark SQL job](examples/tpcds.yaml). 

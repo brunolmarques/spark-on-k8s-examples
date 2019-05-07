@@ -27,9 +27,8 @@ spec:
     spec:
       containers:
       - name: hdfs-etl
-          # take image with spark configuration release from 26.04.2019
           # if to pull new image each time: imagePullPolicy: Always
-        image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-060519
+        image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-070519
           # source configuration and submit job
         command: ["/bin/sh"]
         args:

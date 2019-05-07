@@ -32,6 +32,10 @@ RUN curl https://cafiles.cern.ch/cafiles/certificates/CERN%20Root%20Certificatio
     keytool -importcert -file CERNRootCertificationAuthority2.crt -keystore kafka.jks -alias "cernroot" -storepass password -noprompt && \
     keytool -importcert -file CERNGridCertificationAuthority.crt -keystore kafka.jks -alias "cerngrid" -storepass password -noprompt
 
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.14.0/bin/linux/amd64/kubectl && \
+    chmod +x ./kubectl && \
+    mv ./kubectl /usr/local/bin/kubectl
+
 COPY --from=examples-builder /tmp/tpcds-kit/tools /opt/tpcds-kit/tools
 COPY ./data/* ./
 COPY ./libs/* ./

@@ -6,9 +6,8 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-060519
+  image: gitlab-registry.cern.ch/db/spark-service/spark-k8s-examples:v1.1-070519
   sparkVersion: 2.4.1
-  # if to pull new image if time: imagePullPolicy: Always
   mainClass: ch.cern.sparkrootapplications.EventsSelect
   mainApplicationFile: local:///usr/hdp/spark/examples/jars/spark-k8s-examples-assembly-1.1.jar
   mode: cluster
