@@ -2,7 +2,82 @@
 
 Collection of stable application's examples for spark on kubernetes service.
 
-### Application examples
+### Access CVMFS and EOS
+
+CVMFS and EOS are the typical resources required for ROOT analysis with spark
+
+```
+# Obtain KUBECONFIG from SWAN (select 'cloud containers') or contact it-hadoop-support@cern.ch
+# from SWAN terminal /spark/k8s-user.config
+export KUBECONFIG=/path/to/kubeconfig
+
+# propagate krb cache with kubernetes token mechansim
+export KRB5CCNAME=/tmp/krb5cc_$USER
+kubectl create secret generic krb5ccname --from-file=$KRB5CCNAME -n $USER
+
+# source /cvmfs/sft-nightlies.cern.ch/lcg/views/dev3python3/latest/x86_64-centos7-gcc10-opt/setup.sh
+import os
+from pyspark import SparkConf, SparkContext
+
+config = {
+    "spark.master": "k8s://https://188.184.157.211:6443",
+    "spark.executor.instances": 3,
+    "spark.kubernetes.authenticate.driver.serviceAccountName": "spark",
+    "spark.kubernetes.container.image": "gitlab-registry.cern.ch/db/spark-service/docker-registry/swan:v3",
+    "spark.kubernetes.container.image.pullPolicy": "IfNotPresent",
+    "spark.kubernetes.executor.secrets.krb5ccname": "/tokens",
+    "spark.executorEnv.KRB5CCNAME": "/tokens/krb5cc_0",
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.cvmfs-sft.mount.path": "/cvmfs/sft.cern.ch",
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.cvmfs-sft.mount.readOnly": "true",
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.cvmfs-sft.options.claimName": "cvmfs-sft-cern-ch-pvc",
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.sft-nightlies-cern-ch.mount.path": "/cvmfs/sft-nightlies.cern.ch",
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.sft-nightlies-cern-ch.mount.readOnly": "true",
+    "spark.kubernetes.executor.volumes.persistentVolumeClaim.sft-nightlies-cern-ch.options.claimName": "cvmfs-sft-nightlies-cern-ch-pvc",
+    "spark.kubernetes.namespace": os.environ.get('SPARK_USER'),
+    "spark.executorEnv.PYTHONPATH": os.environ.get('PYTHONPATH'),
+    "spark.executorEnv.JAVA_HOME": os.environ.get('JAVA_HOME'),
+    "spark.executorEnv.SPARK_HOME": os.environ.get('SPARK_HOME'),
+    "spark.executorEnv.SPARK_EXTRA_CLASSPATH": os.environ.get('SPARK_DIST_CLASSPATH'),
+    "spark.executorEnv.LD_LIBRARY_PATH": os.environ.get('LD_LIBRARY_PATH'),
+    "spark.network.timeout": 60,
+    "spark.task.maxDirectResultSize": 10000000000,
+}
+
+sparkConf = SparkConf().setAll(config.items())
+
+sc = SparkContext.getOrCreate(sparkConf)
+
+def ROOT_version(range):
+    import ROOT
+    return ROOT.__version__
+
+def reduce_ROOT_version(v1, v2):
+    return ",".join([v1,v2])
+
+print(sc.parallelize(range(3)).map(ROOT_version).reduce(reduce_ROOT_version))
+```
+
+### Access S3
+
+Additional parameters required for accessing S3, you may also need S3 jars if you are not using CVMFS
+
+```
+--conf spark.hadoop.fs.s3a.impl="org.apache.hadoop.fs.s3a.S3AFileSystem"
+--conf spark.hadoop.fs.s3a.endpoint="s3.cern.ch"
+--conf spark.hadoop.fs.s3a.access.key="XXXXXXXXXXXXX"
+--conf spark.hadoop.fs.s3a.secret.key="xxxxxxxxxxxxxxxxxx"
+```
+
+### Access HDFS
+
+In addition to krb conf
+
+```
+export HADOOP_CONF_DIR=/cvmfs/sft.cern.ch/lcg/etc/hadoop-confext/conf/etc/analytix/hadoop.analytix
+--conf spark.executorEnv.HADOOP_CONF_DIR=/cvmfs/sft.cern.ch/lcg/etc/hadoop-confext/conf/etc/analytix/hadoop.analytix
+```
+
+### Archived Application examples based on spark operator (no longer recommended)
 
 - [Spark Streaming Job](examples/kafka-streaming.yaml)
 - [HDFS/YARN ETL Job](examples/yarn-hdfs-job.yaml)
